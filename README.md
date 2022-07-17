@@ -43,7 +43,7 @@
   </li>
   <li>
     <a href="https://www.mysql.com/">
-    <strong>Cargo Watch</strong>(strongly recommended)<br>
+    <strong>Cargo Watch</strong>(strongly recommended for easy development)<br>
     </a>
   </li>
 </ul>
@@ -52,6 +52,11 @@
 <ol>
   <li><strong>Clone</strong> this repository<br>
     <code>git clone https://github.com/giornn0/basic-api.git</code>
+  </li>
+  <li><strong>Create</strong> the .env file<br>
+    <code>cp .env.example .env</code>
+  </li>
+  <li><strong>Open</strong> the .env file and <strong>configure accordingly.</strong>. <br>
   </li>
   <li>In the cloned directory run<strong></strong><br>
     <code>cargo watch -x "run"</code><small>(if cargo-watch installed)</small> <br>
