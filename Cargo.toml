@@ -1,0 +1,33 @@
+[package]
+name = "base-api"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio={version="1.19.2", features=["full"]}
+futures = { version = "0.3", default-features = false }
+warp="0.3.2"
+#db Orms
+diesel={version="1.4.8", features=["postgres","uuidv07","r2d2","chrono","numeric"]}
+#graphql
+juniper="0.15.9"
+#db types and traits
+uuid={version="1.0.0", features=["serde","v4"]}
+chrono={version="0.4.19", features=["serde"]}
+bigdecimal = {version="0.1.2", features=["serde"]}
+#ser/des json/struct
+serde={version="1.0.133", features=["derive"]}
+serde_json = "1.0"
+dotenv="0.15.0"
+#hashing
+argon2 = "0.4"
+rand_core = { version = "0.6", features = ["std"] }
+#request validation
+validator = { version = "0.15", features = ["derive"] }
+http-api-problem = { version =  "0.52.0", features = ["hyper", "warp"] }
+jsonwebtoken="8.1.0"
+#multipart
+#errors
+thiserror="1.0.31"
