@@ -6,7 +6,7 @@ use crate::core::server_model::Pool;
 use crate::core::server_service::up_server;
 use crate::core::websockets_handler::get_ws_handler;
 use crate::utils::server::port;
-use crate::work::users::router::users_router;
+use crate::application::users::router::users_router;
 
 pub async fn app(pool: &Arc<Pool>) {
     let port = port().unwrap();

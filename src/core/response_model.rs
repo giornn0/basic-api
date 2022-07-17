@@ -1,4 +1,4 @@
-enum Response{
+pub enum Response{
     Created,
     Updated,
     Removed,

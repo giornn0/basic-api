@@ -11,6 +11,7 @@ pub async fn get_one(
     current_user: AuthPayload,
     pool: Arc<Pool>,
 ) -> Result<Json, Rejection> {
+    
     Ok(warp::reply::json(&current_user))
     // Err(warp::reject::custom(Error::WhileQuerying))
 }

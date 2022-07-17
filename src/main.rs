@@ -3,7 +3,7 @@ extern crate diesel;
 mod app;
 mod core;
 mod utils;
-mod work;
+mod application;
 use app::app;
 use crate::core::server_service::start_db;
 

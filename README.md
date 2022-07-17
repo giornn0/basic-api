@@ -62,7 +62,7 @@
     <code>cargo watch -x "run"</code><small>(if cargo-watch installed)</small> <br>
     <code>cargo run</code>
   </li>
-  <li>Try to work the most part of your application <strong>inside work directory</strong><br>
+  <li>Try to work the most part of your application <strong>inside application directory</strong><br>
   </li>
   <li><strong>Enjoy</strong><br>
   </li>
