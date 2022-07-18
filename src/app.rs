@@ -1,12 +1,13 @@
 use std::sync::Arc;
 use warp::Filter;
 
+use crate::application::credentials::router::credential_router;
+use crate::application::users::router::users_router;
 use crate::core::errors::handle_rejections;
 use crate::core::server_model::Pool;
 use crate::core::server_service::up_server;
 use crate::core::websockets_handler::get_ws_handler;
 use crate::utils::server::port;
-use crate::application::users::router::users_router;
 
 pub async fn app(pool: &Arc<Pool>) {
     let port = port().unwrap();
@@ -16,9 +17,11 @@ pub async fn app(pool: &Arc<Pool>) {
         .and(warp::path::end())
         .and_then(up_server);
 
-
     let ws = get_ws_handler();
-    let apis = start.or(users_router(&pool)).recover(handle_rejections);
+    let apis = start
+        .or(users_router(&pool))
+        .or(credential_router(&pool))
+        .recover(handle_rejections);
 
     let cors = warp::cors()
         .allow_any_origin()
@@ -27,12 +30,13 @@ pub async fn app(pool: &Arc<Pool>) {
 
     let routes = apis.with(cors).or(ws);
 
-    let (addr, server) = warp::serve(routes).bind_with_graceful_shutdown(([0, 0, 0, 0], port), async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("Not used Ctrl + C for close");
-        println!("Shutting down Server");
-    });
+    let (addr, server) =
+        warp::serve(routes).bind_with_graceful_shutdown(([0, 0, 0, 0], port), async {
+            tokio::signal::ctrl_c()
+                .await
+                .expect("Not used Ctrl + C for close");
+            println!("Shutting down Server");
+        });
     println!("Server listening => {}", addr);
 
     server.await;

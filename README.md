@@ -58,6 +58,8 @@
   </li>
   <li><strong>Open</strong> the .env file and <strong>configure accordingly.</strong>. <br>
   </li>
+  <li>If using <strong>MySQL</strong> remembver to modify the type of the <strong>pooled connection.</strong>. <br>
+  </li>
   <li>In the cloned directory run<strong></strong><br>
     <code>cargo watch -x "run"</code><small>(if cargo-watch installed)</small> <br>
     <code>cargo run</code>
