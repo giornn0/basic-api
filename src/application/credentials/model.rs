@@ -1,7 +1,7 @@
 
 use serde::{Deserialize, Serialize};
 use validator::Validate;
-use crate::schema::credentials;
+use crate::{schema::credentials, utils::passwords::hash};
 
 #[derive(Queryable,Serialize,Deserialize)]
 pub struct Credential{
@@ -21,6 +21,17 @@ pub struct NewCredential {
     #[validate(email)]
     email: String,
     state: Option<bool>,
+}
+impl NewCredential{
+    pub fn hash_password(&mut self)-> &Self{
+        match hash(&self.password){
+            Some(hash) =>{
+                self.password = hash;
+                self
+            },
+            None=>self
+        }
+    }
 }
 
 #[derive(Serialize,Deserialize)]

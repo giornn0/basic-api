@@ -13,7 +13,7 @@ pub struct User{
     updated_at: chrono::NaiveDateTime,
     //contact_id: i32,
 }
-#[derive(Serialize, Deserialize, Debug, Insertable, AsChangeset, Validate)]
+#[derive(Serialize, Deserialize, Debug, Insertable, Validate)]
 #[table_name = "users"]
 pub struct NewUser {
     #[validate(length(min = 2, max = 55))]
@@ -21,6 +21,14 @@ pub struct NewUser {
     #[validate(length(min = 2, max = 55))]
     lastname: String,
     credential_id: i32,
+}
+#[derive(Serialize, Deserialize, Debug, AsChangeset, Validate)]
+#[table_name = "users"]
+pub struct UpdateUser {
+    #[validate(length(min = 2, max = 55))]
+    name: String,
+    #[validate(length(min = 2, max = 55))]
+    lastname: String,
 }
 
 #[derive(Serialize,Deserialize)]
