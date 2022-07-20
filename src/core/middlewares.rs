@@ -7,7 +7,7 @@ use warp::{header, reject::custom, Filter, Rejection};
 use super::{
     helpers::validate,
     server_model::Pool,
-    token_model::{AuthPayload, FromToken},
+    tokens::{AuthPayload, FromToken},
 };
 
 pub fn with_pool(

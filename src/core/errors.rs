@@ -27,6 +27,8 @@ pub enum Error {
     FailedPool,
     #[error("Error formatting the body")]
     InvalidBody(ValidationErrors),
+    #[error("{0}")]
+    Redaction(StatusCode,String),
 }
 impl Reject for Error {}
 
@@ -48,6 +50,7 @@ pub async fn handle_rejections(err: Rejection) -> Result<impl Reply, Infallible>
             Error::WrongToken => (StatusCode::BAD_REQUEST, c_error.to_string(),None),
             Error::WhileQuerying => (StatusCode::NOT_IMPLEMENTED, c_error.to_string(),None),
             Error::FailedPool => (StatusCode::SERVICE_UNAVAILABLE, c_error.to_string(),None),
+            Error::Redaction(status,error)=> (status.to_owned(), error.to_owned(),None),
             Error::InvalidBody(errors)=> (StatusCode::BAD_REQUEST, c_error.to_string(),Some(format!("Errors => {}",errors))),
         }
     } else if let Some(_s_error) = err.find::<MissingHeader>() {

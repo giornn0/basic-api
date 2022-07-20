@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use warp::Filter;
 
-use crate::application::credentials::router::credential_router;
 use crate::application::users::router::users_router;
 use crate::core::errors::handle_rejections;
 use crate::core::server_model::Pool;
@@ -20,7 +19,6 @@ pub async fn app(pool: &Arc<Pool>) {
     let ws = get_ws_handler();
     let apis = start
         .or(users_router(&pool))
-        .or(credential_router(&pool))
         .recover(handle_rejections);
 
     let cors = warp::cors()
