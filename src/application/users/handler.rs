@@ -64,6 +64,6 @@ pub async fn get_index(
     queries: Queries,
     current_user: AuthPayload,
     pool: Arc<Pool>,
-) -> Result<Json, Rejection> {
-    Ok(warp::reply::json(&AuthPayload::default()))
+) -> Result<WithStatus<Json>, Rejection> {
+    Response::<bool>::send(Action::Removed("User removed succesfully"))
 }

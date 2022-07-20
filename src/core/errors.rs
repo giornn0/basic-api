@@ -5,9 +5,8 @@ use serde::Serialize;
 use thiserror::Error as ThisError;
 use validator::ValidationErrors;
 use warp::{
-    body::json,
     reject::{MissingHeader, Reject, MethodNotAllowed},
-    reply::{self, with_status},
+    reply::{ with_status},
     Rejection, Reply,
 };
 

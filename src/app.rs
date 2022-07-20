@@ -2,6 +2,7 @@ use std::sync::Arc;
 use warp::Filter;
 
 use crate::application::users::router::users_router;
+use crate::core::credentials::login;
 use crate::core::errors::handle_rejections;
 use crate::core::server_model::Pool;
 use crate::core::server_service::up_server;
@@ -14,7 +15,7 @@ pub async fn app(pool: &Arc<Pool>) {
     let start = warp::get()
         .and(warp::path("api"))
         .and(warp::path::end())
-        .and_then(up_server);
+        .and_then(up_server).or(login(&pool));
 
     let ws = get_ws_handler();
     let apis = start

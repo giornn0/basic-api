@@ -12,6 +12,8 @@ use crate::{
     utils::server::token_key,
 };
 
+use super::credentials::LogModel;
+
 #[derive(Serialize,Deserialize,Debug,Clone)]
 pub enum Role{
     Admin,
@@ -20,7 +22,7 @@ pub enum Role{
 }
 
 pub trait FromToken {
-    fn decode(&self, token: String)->Result<TokenData<Self>, Error> where Self: Sized;
+    fn decode( token: String)->Result<TokenData<Self>, Error> where Self: Sized;
     fn from_token(token: String, db_pool: Arc<Pool>) -> Result<Self, Error>
     where
         Self: Sized,
@@ -32,40 +34,22 @@ pub trait FromToken {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AuthPayload {
     id: i32,
-    model: String,
+    log_model: LogModel,
     name: String,
     role: Role,
     exp: i64,
 }
-impl Default for AuthPayload {
-    fn default() -> Self {
-        let expiration = Utc::now()
-            .checked_add_signed(chrono::Duration::seconds(60))
-            .expect("valid timestamp")
-            .timestamp();
-        AuthPayload {
-            id: 4,
-            model: "testing".to_owned(),
-            name: "naming".to_owned(),
-            role: Role::Client,
-            exp: expiration,
-        }
-    }
-}
+
 impl FromToken for AuthPayload {
-    fn decode(&self, token: String)->Result<TokenData<Self>, Error> where Self: Sized{
+    fn decode(token: String)->Result<TokenData<Self>, Error> where Self: Sized{
         decode::<AuthPayload>(
             &token,
             &DecodingKey::from_secret(token_key().as_bytes()),
             &Validation::new(Algorithm::HS256)).map_err(reject_error)
     }
     fn from_token(token: String, db_pool: Arc<Pool>) -> Result<AuthPayload, Error> {
-        let test = AuthPayload::default();
-
-        let token1 = encode_model(&test)?;
-        let decoded = test.decode(token1)?;
-        println!("{:?}", &decoded.claims);
-        Ok(test)
+        let decoded = AuthPayload::decode(token)?;
+        Ok(decoded.claims)
     }
 }
 

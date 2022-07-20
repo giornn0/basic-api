@@ -37,9 +37,9 @@ pub struct Queries {}
 
 #[derive(Serialize, Deserialize, Debug, Validate,Clone)]
 pub struct UserRegister {
-    #[validate(length(min = 2, max = 255))]
+    #[validate(length(min = 5, max = 255))]
     password: String,
-    #[validate(length(min = 2, max = 40), email)]
+    #[validate(length(min = 5, max = 40), email)]
     email: String,
     #[validate(length(min = 2, max = 55))]
     name: String,
