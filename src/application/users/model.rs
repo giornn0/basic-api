@@ -4,6 +4,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use validator::Validate;
+use warp::Rejection;
 
 #[derive(Queryable, Serialize, Deserialize)]
 pub struct User {
@@ -54,7 +55,7 @@ impl UserRegister{
     }
 }
 impl GetCredential<UserRegister> for UserRegister {
-    fn get_credential(&self) -> NewCredential {
+    fn get_credential(&self) -> Result<NewCredential, Rejection> {
         let clone = (*self).clone();
         NewCredential::new(
             clone.password,

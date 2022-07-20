@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use chrono::Utc;
 use jsonwebtoken::{
-    decode, encode, errors::Error as JWTError, DecodingKey, EncodingKey, Header, Validation, TokenData,
-    Algorithm
+    decode, encode, errors::Error as JWTError, Algorithm, DecodingKey, EncodingKey, Header,
+    TokenData, Validation,
 };
 use serde::{Deserialize, Serialize};
 
@@ -14,21 +14,20 @@ use crate::{
 
 use super::credentials::LogModel;
 
-#[derive(Serialize,Deserialize,Debug,Clone)]
-pub enum Role{
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Role {
     Admin,
     User,
-    Client
+    Client,
 }
 
 pub trait FromToken {
-    fn decode( token: String)->Result<TokenData<Self>, Error> where Self: Sized;
+    fn decode(token: String) -> Result<TokenData<Self>, Error>
+    where
+        Self: Sized;
     fn from_token(token: String, db_pool: Arc<Pool>) -> Result<Self, Error>
     where
-        Self: Sized,
-    {
-        Err(Error::WrongToken)
-    }
+        Self: Sized;
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -41,11 +40,16 @@ pub struct AuthPayload {
 }
 
 impl FromToken for AuthPayload {
-    fn decode(token: String)->Result<TokenData<Self>, Error> where Self: Sized{
+    fn decode(token: String) -> Result<TokenData<Self>, Error>
+    where
+        Self: Sized,
+    {
         decode::<AuthPayload>(
             &token,
             &DecodingKey::from_secret(token_key().as_bytes()),
-            &Validation::new(Algorithm::HS256)).map_err(reject_error)
+            &Validation::new(Algorithm::HS256),
+        )
+        .map_err(reject_error)
     }
     fn from_token(token: String, db_pool: Arc<Pool>) -> Result<AuthPayload, Error> {
         let decoded = AuthPayload::decode(token)?;

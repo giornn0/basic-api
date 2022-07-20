@@ -11,7 +11,7 @@ pub trait DefaultMsg{
 pub trait Send<'a, T: Serialize>{
     fn send(action: Action<'a, T>)->Result<WithStatus<Json>,Rejection>;
 }
-pub trait HashedValue<T>{
+pub trait HashedValue{
     fn hashed_value(unhashed: String)->Result<String, Rejection>{
         if let Some(hash)= hash(&unhashed){
             return Ok(hash)

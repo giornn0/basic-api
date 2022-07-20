@@ -8,7 +8,7 @@ use crate::{
     utils::{
         database::{get_pool, reject_error},
         passwords::hash,
-        traits::Send,
+        traits::{Send, HashedValue},
     },
 };
 use diesel::{
@@ -72,25 +72,21 @@ pub struct NewCredential {
     state: Option<bool>,
     log_model: LogModel,
 }
+impl HashedValue for NewCredential{}
 impl NewCredential {
-    fn hash_password(unhashed_pass: String) -> String {
-        match hash(&unhashed_pass) {
-            Some(hash) => hash,
-            None => unhashed_pass,
-        }
-    }
-    pub fn new(password: String, email: String, log_model: LogModel, state: Option<bool>) -> Self {
-        NewCredential {
-            password: NewCredential::hash_password(password),
+    pub fn new(unhashed: String, email: String, log_model: LogModel, state: Option<bool>) -> Result<Self, Rejection> {
+        let password = NewCredential::hashed_value(unhashed)?;
+        Ok(NewCredential {
+            password,
             email,
             state,
             log_model,
-        }
+        })
     }
 }
 
 pub trait GetCredential<T: Validate> {
-    fn get_credential(&self) -> NewCredential;
+    fn get_credential(&self) -> Result<NewCredential, Rejection>;
 }
 pub trait GetRegister<T: Validate, I: Insertable<G>, G> {
     fn get_register(&self, credential_id: i32) -> I;
@@ -121,7 +117,6 @@ pub fn unique_credential_mail(
             format!("The {} is already used", email),
         )));
     }
-
     Ok(())
 }
 

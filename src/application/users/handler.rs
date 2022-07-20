@@ -37,7 +37,8 @@ pub async fn create_one(
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;
     unique_credential_mail(data.email(), &conn)?;
-    let new_credential = new_credential(data.get_credential(), &conn)?;
+    let values_credential = data.get_credential()?;
+    let new_credential = new_credential(values_credential, &conn)?;
     let new_user = create_user(data.get_register(new_credential.id()), &conn)?;
     Response::send(Action::Created(new_user, "User created succesfully"))
 }
