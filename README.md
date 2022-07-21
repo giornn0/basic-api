@@ -95,3 +95,11 @@
     <code>cargo run --release</code>
   </li>
 </ol>
+<h3>Pending</h3>
+<ul>
+  <li><strong>Order</strong> for tokens and credential<br>
+  </li>
+  <li><strong>Config</strong> folder<br>
+    <strong>Order</strong> between some customizables traits and enums 
+  </li>
+</ul>
