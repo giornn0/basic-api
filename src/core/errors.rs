@@ -14,12 +14,16 @@ use warp::{
 pub enum Error {
     #[error("Invalid request parameters, the server could not handle this request")]
     InvalidRequest,
+    #[error("Not register found for the current values")]
+    DbNotFound,
     #[error("Unauthorized action, need for authentication")]
     Unauthorized,
     #[error("Forbidden request, the user cant acces the request source")]
     Forbidden,
     #[error("Invalid token")]
     WrongToken,
+    #[error("Erro while formatting the token")]
+    BadTokenization,
     #[error("Error while querying the database")]
     WhileQuerying,
     #[error("Error while pooling the database")]
@@ -44,9 +48,11 @@ pub async fn handle_rejections(err: Rejection) -> Result<impl Reply, Infallible>
     } else if let Some(c_error) = err.find::<Error>() {
         match c_error {
             Error::InvalidRequest => (StatusCode::BAD_REQUEST, c_error.to_string(),None),
+            Error::DbNotFound => (StatusCode::NOT_FOUND, c_error.to_string(),None),
             Error::Unauthorized => (StatusCode::UNAUTHORIZED, c_error.to_string(),None),
             Error::Forbidden => (StatusCode::FORBIDDEN, c_error.to_string(),None),
             Error::WrongToken => (StatusCode::BAD_REQUEST, c_error.to_string(),None),
+            Error::BadTokenization => (StatusCode::BAD_REQUEST, c_error.to_string(),None),
             Error::WhileQuerying => (StatusCode::NOT_IMPLEMENTED, c_error.to_string(),None),
             Error::FailedPool => (StatusCode::SERVICE_UNAVAILABLE, c_error.to_string(),None),
             Error::Redaction(status,error)=> (status.to_owned(), error.to_owned(),None),

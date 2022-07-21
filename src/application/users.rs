@@ -1,5 +1,5 @@
 mod handler;
 mod model;
 pub mod router;
-mod service;
+pub mod service;
 mod test;

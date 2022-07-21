@@ -6,10 +6,9 @@ use crate::{
         dsl::{credentials as Table, email as Email},
     },
     utils::{
-        database::{get_pool, reject_error},
-        passwords::hash,
-        traits::{Send, HashedValue},
-    },
+        database::{get_pool, reject_db_error},
+        traits::{ HashedValue, Send}, passwords::auth_hash,
+    }, application::users::service::get_user_payload,
 };
 use diesel::{
     prelude::*,
@@ -32,7 +31,7 @@ use super::{
     errors::Error,
     middlewares::{with_pool, with_valid_json},
     response::{Action, Response},
-    server_model::Pool,
+    server_model::Pool, tokens::{AuthPayload, ToToken, Token},
 };
 
 #[derive(DbEnum, Debug, Serialize, Deserialize, Clone)]
@@ -42,7 +41,7 @@ pub enum LogModel {
     Worker, //'worker
 }
 
-#[derive(Queryable, Serialize, Deserialize, Debug)]
+#[derive(Queryable, Serialize, Deserialize, Debug,Clone)]
 pub struct Credential {
     id: i32,
     password: String,
@@ -55,6 +54,10 @@ pub struct Credential {
 impl Credential {
     pub fn id(&self) -> i32 {
         self.id
+    }
+    pub fn password(&self)->String{
+        let cloned = (*self).clone();
+        String::from(cloned.password)
     }
 }
 #[derive(Serialize, Deserialize, Validate)]
@@ -99,7 +102,7 @@ pub fn new_credential(
     value
         .insert_into(Table)
         .get_result(conn)
-        .map_err(reject_error)
+        .map_err(reject_db_error)
 }
 pub fn unique_credential_mail(
     email: &String,
@@ -108,7 +111,7 @@ pub fn unique_credential_mail(
     let registers = credentials::table
         .filter(Email.eq_all(email))
         .load::<Credential>(conn)
-        .map_err(reject_error)?;
+        .map_err(reject_db_error)?;
 
     if registers.len() > 0 {
         // the value of the username will automatically be added later
@@ -120,12 +123,27 @@ pub fn unique_credential_mail(
     Ok(())
 }
 
+fn get_credential(login_payload: LoginPayload, conn:&PooledConnection<ConnectionManager<PgConnection>> )-> Result<Credential, Rejection>{
+    let credential: Credential = Table.filter(Email.eq(&login_payload.email)).get_result(conn).map_err(reject_db_error)?;
+    if auth_hash(credential.password(), login_payload.password) {
+        return Ok(credential)
+    }
+    Err(custom(Error::Unauthorized))
+}
+
 async fn login_handler(
-    credential: LoginPayload,
+    log_payload: LoginPayload,
     pool: Arc<Pool>,
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;
-    Response::<bool>::send(Action::Removed("testing"))
+    let credential = get_credential(log_payload, &conn)?;
+    let session: AuthPayload = match credential.log_model{
+        LogModel::User=> get_user_payload(credential.id, &conn),
+        LogModel::Client=>Err(custom(Error::Redaction(StatusCode::NOT_IMPLEMENTED, "Modelo sin implementar".to_owned()))),
+        LogModel::Worker=>Err(custom(Error::Redaction(StatusCode::NOT_IMPLEMENTED, "Modelo sin implementar".to_owned()))),
+    }?;
+    let token = session.to_token()?;
+    Response::send(Action::Logged(token,"Bienvenido"))
 }
 
 pub fn login(pool: &Arc<Pool>) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {

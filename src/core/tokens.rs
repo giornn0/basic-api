@@ -1,15 +1,15 @@
 use std::sync::Arc;
 
-use chrono::Utc;
 use jsonwebtoken::{
     decode, encode, errors::Error as JWTError, Algorithm, DecodingKey, EncodingKey, Header,
     TokenData, Validation,
 };
 use serde::{Deserialize, Serialize};
+use warp::Rejection;
 
 use crate::{
     core::{errors::Error, server_model::Pool},
-    utils::server::token_key,
+    utils::server::{reject_error, token_key},
 };
 
 use super::credentials::LogModel;
@@ -21,6 +21,9 @@ pub enum Role {
     Client,
 }
 
+pub trait HasSession {
+    fn get_auth(self, log_model: LogModel) -> Result<AuthPayload, Error>;
+}
 pub trait FromToken {
     fn decode(token: String) -> Result<TokenData<Self>, Error>
     where
@@ -30,6 +33,21 @@ pub trait FromToken {
         Self: Sized;
 }
 
+#[derive(Serialize)]
+pub struct Token {
+    token: String,
+}
+pub trait ToToken {
+    fn get_auth<T: HasSession>(
+        id: i32,
+        log_model: LogModel,
+        name: String,
+        role: Role,
+        exp: i64,
+    ) -> AuthPayload;
+    fn to_token(self) -> Result<Token, Rejection>;
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AuthPayload {
     id: i32,
@@ -37,6 +55,31 @@ pub struct AuthPayload {
     name: String,
     role: Role,
     exp: i64,
+}
+
+impl ToToken for AuthPayload
+where
+    Token: Serialize,
+{
+    fn get_auth<T: HasSession>(
+        id: i32,
+        log_model: LogModel,
+        name: String,
+        role: Role,
+        exp: i64,
+    ) -> AuthPayload {
+        AuthPayload {
+            id,
+            log_model,
+            name,
+            role,
+            exp,
+        }
+    }
+    fn to_token(self) -> Result<Token, Rejection> {
+        let token = encode_model(self).map_err(reject_error)?;
+        Ok(Token { token })
+    }
 }
 
 impl FromToken for AuthPayload {
@@ -49,24 +92,29 @@ impl FromToken for AuthPayload {
             &DecodingKey::from_secret(token_key().as_bytes()),
             &Validation::new(Algorithm::HS256),
         )
-        .map_err(reject_error)
+        .map_err(bad_token)
     }
-    fn from_token(token: String, db_pool: Arc<Pool>) -> Result<AuthPayload, Error> {
-        let decoded = AuthPayload::decode(token)?;
+    fn from_token(bearer: String, _db_pool: Arc<Pool>) -> Result<AuthPayload, Error> {
+        let mut token = bearer.split_whitespace();
+        let decoded = AuthPayload::decode(String::from(token.nth(1).expect("Token Malformed")))?;
         Ok(decoded.claims)
     }
 }
 
-fn reject_error(err: JWTError) -> Error {
+fn bad_token(err: JWTError) -> Error {
     println!("{}", err);
     Error::WrongToken
 }
+fn bad_model(err: String) -> Error {
+    println!("{}", err);
+    Error::BadTokenization
+}
 
-fn encode_model<T: Serialize>(model: &T) -> Result<String, Error> {
+fn encode_model<AuthPayload: Serialize>(model: AuthPayload) -> Result<String, Error> {
     encode(
         &Header::new(Algorithm::HS256),
-        model,
+        &model,
         &EncodingKey::from_secret(token_key().as_bytes()),
     )
-    .map_err(reject_error)
+    .map_err(bad_token)
 }

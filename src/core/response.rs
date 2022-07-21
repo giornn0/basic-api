@@ -12,6 +12,7 @@ pub enum Action<'a,T: Serialize> {
     Removed(&'a str),
     Indexed(T, &'a str),
     Finded(T, &'a str),
+    Logged(T, &'a str),
     Calculated(T, &'a str),
 }
 impl<'a, T: Serialize> Action<'a,T>{
@@ -36,6 +37,9 @@ impl<T: Serialize> Response<T> {
         match res {
             Action::Created(data, msg) => {
                 (Response::create(msg, Some(data)), StatusCode::CREATED)
+            }
+            Action::Logged(data, msg) => {
+                (Response::create(msg, Some(data)), StatusCode::ACCEPTED)
             }
             Action::Updated(data, msg) => (Response::create(msg, Some(data)), StatusCode::OK),
             Action::Removed(msg) => (Response::create(msg, None), StatusCode::OK),

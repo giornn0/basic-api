@@ -1,10 +1,13 @@
 use crate::{
-    core::credentials::{LogModel, NewCredential, GetRegister, GetCredential},
+    core::{credentials::{LogModel, NewCredential, GetRegister, GetCredential}, tokens::{HasSession, AuthPayload, Role, ToToken}, errors::Error},
     schema::users,
 };
+use http_api_problem::StatusCode;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 use warp::Rejection;
+use chrono::{Utc, Duration};
+
 
 #[derive(Queryable, Serialize, Deserialize)]
 pub struct User {
@@ -15,6 +18,23 @@ pub struct User {
     created_at: chrono::NaiveDateTime,
     updated_at: chrono::NaiveDateTime,
     //contact_id: i32,
+}
+impl HasSession for User{
+    fn get_auth(self, log_model: LogModel)->Result<AuthPayload,Error> {
+        match Utc::now().checked_add_signed(Duration::minutes(10)){
+            Some(time)=>{
+                let exp = time.timestamp();
+                Ok(AuthPayload::get_auth::<User>(
+                    self.id,
+                    log_model,
+                    format!("{}, {}",self.lastname,self.name),
+                    Role::User,
+                    exp
+                ))
+            },
+            None=>Err(Error::Redaction(StatusCode::INTERNAL_SERVER_ERROR, "Error while trying to create a timestamp".to_owned()))
+        }
+    }
 }
 #[derive(Serialize, Deserialize, Insertable)]
 #[table_name = "users"]

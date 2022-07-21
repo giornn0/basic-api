@@ -32,7 +32,6 @@ pub async fn get_one(
 }
 pub async fn create_one(
     data: UserRegister,
-    current_user: AuthPayload,
     pool: Arc<Pool>,
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;

@@ -56,7 +56,6 @@ pub fn users_router(
         .and(post())
         .and(end())
         .and(with_valid_json())
-        .and(with_authenticathed(db_pool))
         .and(with_pool(db_pool.clone()))
         .and_then(create_one);
     one.or(index).or(create).or(update).or(remove)
