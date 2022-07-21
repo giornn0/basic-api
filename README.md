@@ -46,6 +46,24 @@
     <strong>Cargo Watch</strong>(strongly recommended for easy development)<br>
     </a>
   </li>
+    <li>
+    After any migration runned change credential table to (add/ remove the custom columnss at pleasure)<br>
+    <code>
+    table! {
+    use diesel::{sql_types::{Nullable,Bool,Text, Timestamptz}, types::{ Int4, Varchar}};
+    use crate::core::credentials::LogModelMapping;
+    credentials (id) {
+        id -> Int4,
+        password -> Text,
+        email -> Varchar,
+        state -> Nullable<Bool>,
+        log_model -> LogModelMapping,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
+    }
+}
+    </code>
+  </li>
 </ul>
 <hr><br>
 <h3>Usage</h3>
