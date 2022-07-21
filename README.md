@@ -47,7 +47,7 @@
     </a>
   </li>
     <li>
-    After any migration runned change credential table to (add/ remove the custom columnss at pleasure)<br>
+        After any migration runned change credential table (or any table using a special type) to the follow (add/ remove the custom columnss at pleasure) <br>
     <code>
     table! {
     use diesel::{sql_types::{Nullable,Bool,Text, Timestamptz}, types::{ Int4, Varchar}};

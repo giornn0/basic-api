@@ -14,7 +14,7 @@ use warp::{
 pub enum Error {
     #[error("Invalid request parameters, the server could not handle this request")]
     InvalidRequest,
-    #[error("Not register found for the current values")]
+    #[error("Register not found for the current values")]
     DbNotFound,
     #[error("Unauthorized action, need for authentication")]
     Unauthorized,
