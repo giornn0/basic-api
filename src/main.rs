@@ -2,6 +2,7 @@
 extern crate diesel;
 
 mod app;
+mod config;
 mod core;
 mod utils;
 mod application;

@@ -1,5 +1,5 @@
 use serde::Serialize;
-use warp::{reply::{WithStatus, Json}, Rejection, reject::custom};
+use warp::{reply::{WithStatus,Json, Response}, Rejection, reject::custom, Reply, hyper::HeaderMap};
 
 use crate::core::{response::Action, errors::Error};
 

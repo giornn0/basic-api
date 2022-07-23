@@ -1,5 +1,5 @@
 use crate::{
-    core::{credentials::{LogModel, NewCredential, GetRegister, GetCredential}, tokens::{HasSession, AuthPayload, Role, ToToken}, errors::Error},
+    core::{credentials::{LogModel, NewCredential, GetRegister, GetCredential}, tokens::{HasSession, AuthPayload, Role, ToToken}, errors::Error, pagination::{Pager, Paginator, Page}},
     schema::users,
 };
 use http_api_problem::StatusCode;
@@ -19,6 +19,8 @@ pub struct User {
     updated_at: chrono::NaiveDateTime,
     //contact_id: i32,
 }
+impl Paginator<User> for User{}
+
 impl HasSession for User{
     fn get_auth(self, log_model: LogModel)->Result<AuthPayload,Error> {
         match Utc::now().checked_add_signed(Duration::minutes(10)){
@@ -54,7 +56,18 @@ pub struct UpdateUser {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Queries {}
+pub struct UserQueries {
+    pub page: Option<i64>,
+    pub take: Option<i64>,
+    pub name: Option<String>,
+    pub lastname: Option<String>,
+    pub credential_id: Option<i32>,
+}
+impl Page for UserQueries{
+    fn get_page(&self)->(i64,i64) {
+        (self.take.unwrap_or(5),self.page.unwrap_or(1))
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Validate,Clone)]
 pub struct UserRegister {

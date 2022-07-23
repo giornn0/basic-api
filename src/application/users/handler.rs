@@ -2,10 +2,10 @@ use std::sync::Arc;
 
 use warp::{
     reply::{Json, WithStatus},
-    Rejection,
+    Rejection, Reply,
 };
 
-use crate::{utils::traits::Send, core::credentials::unique_credential_mail};
+use crate::{utils::traits::Send, core::{credentials::unique_credential_mail, pagination::get_page_headers, helpers::send_with_headers}};
 use crate::{
     core::{
         credentials::{new_credential, GetCredential, GetRegister},
@@ -17,7 +17,7 @@ use crate::{
 };
 
 use super::{
-    model::{Queries, UpdateUser, UserRegister},
+    model::{UserQueries, UpdateUser, UserRegister},
     service::{create_user, get_user, remove_user, update_user, get_user_page},
 };
 
@@ -61,11 +61,13 @@ pub async fn remove_one(
     Response::<bool>::send(Action::Removed("User removed succesfully"))
 }
 pub async fn get_index(
-    queries: Queries,
+    queries: UserQueries,
     current_user: AuthPayload,
     pool: Arc<Pool>,
-) -> Result<WithStatus<Json>, Rejection> {
+) -> Result<impl Reply, Rejection> {
     let conn = get_pool(pool)?;
-    let users = get_user_page(None,None, &conn)?;
-    Response::send(Action::Indexed(users,"User removed succesfully"))
+    let paginated = get_user_page(queries, &conn)?;
+    let headers = get_page_headers(paginated.metadata);
+    let reply = Response::send(Action::Indexed(paginated.data))?;
+    send_with_headers(reply, headers)
 }

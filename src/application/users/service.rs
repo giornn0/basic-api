@@ -1,12 +1,19 @@
-use crate::{utils::{database::reject_db_error, server::reject_error}, core::{tokens::{AuthPayload, HasSession}, credentials::LogModel, pagination::Pagination}};
+use crate::{
+    core::{
+        credentials::LogModel,
+        pagination::{Page, Paginated, Paginator},
+        tokens::{AuthPayload, HasSession},
+    },
+    utils::{database::reject_db_error, server::reject_error},
+};
 use diesel::{
     prelude::*,
-    r2d2::{ConnectionManager, PooledConnection}, dsl::count_star, sql_types::BigInt
+    r2d2::{ConnectionManager, PooledConnection},
 };
 use warp::Rejection;
 
-use super::model::{NewUser, UpdateUser, User};
-use crate::schema::users::dsl::{id as Id, users as Table, credential_id as CredentialId};
+use super::model::{NewUser, UpdateUser, User, UserQueries};
+use crate::schema::users::dsl::{credential_id as CredentialId, id as Id, users as Table};
 
 pub fn get_user(
     id: i32,
@@ -37,32 +44,37 @@ pub fn remove_user(
     conn: &PooledConnection<ConnectionManager<PgConnection>>,
 ) -> Result<usize, Rejection> {
     diesel::delete(Table.filter(Id.eq(id)))
-    .execute(conn)
-    .map_err(reject_db_error)
-}
-
-
-pub fn get_user_page(
-    page: Option<i64>,
-    _take:Option<i64>,
-    conn: &PooledConnection<ConnectionManager<PgConnection>>,
-)->Result<Vec<User>, Rejection>{
-    let test: i64 = Table.count().get_result(conn).map_err(reject_db_error)?;
-    println!("{}",test);
-    let take = _take.unwrap_or(5); 
-    Table
-        .limit(take)
-        .offset((page.unwrap_or(1)-1) * take)
-        .load(conn)
+        .execute(conn)
         .map_err(reject_db_error)
 }
 
-pub fn get_by_credential(credential: i32, conn: &PooledConnection<ConnectionManager<PgConnection>>,
-) -> Result<User, Rejection> {
-    Table.filter(CredentialId.eq(credential)).get_result(conn).map_err(reject_db_error)
+pub fn get_user_page(
+    queries: UserQueries,
+    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+) -> Result<Paginated<Vec<User>>, Rejection> {
+    let count: i64 = Table.count().get_result(conn).map_err(reject_db_error)?;
+    let (take, page) = queries.get_page();
+    let users = Table
+        .limit(take)
+        .offset((page - 1) * take)
+        .load(conn)
+        .map_err(reject_db_error)?;
+    Ok(User::paginate(users,page,take,count))
 }
 
-pub fn get_user_payload(credential_id: i32,conn: &PooledConnection<ConnectionManager<PgConnection>>,
+pub fn get_by_credential(
+    credential: i32,
+    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+) -> Result<User, Rejection> {
+    Table
+        .filter(CredentialId.eq(credential))
+        .get_result(conn)
+        .map_err(reject_db_error)
+}
+
+pub fn get_user_payload(
+    credential_id: i32,
+    conn: &PooledConnection<ConnectionManager<PgConnection>>,
 ) -> Result<AuthPayload, Rejection> {
     let user = get_by_credential(credential_id, conn)?;
     user.get_auth(LogModel::User).map_err(reject_error)
