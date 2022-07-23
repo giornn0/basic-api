@@ -18,7 +18,7 @@ use crate::{
 
 use super::{
     model::{Queries, UpdateUser, UserRegister},
-    service::{create_user, get_user, remove_user, update_user},
+    service::{create_user, get_user, remove_user, update_user, get_user_page},
 };
 
 pub async fn get_one(
@@ -65,5 +65,7 @@ pub async fn get_index(
     current_user: AuthPayload,
     pool: Arc<Pool>,
 ) -> Result<WithStatus<Json>, Rejection> {
-    Response::<bool>::send(Action::Removed("User removed succesfully"))
+    let conn = get_pool(pool)?;
+    let users = get_user_page(None,None, &conn)?;
+    Response::send(Action::Indexed(users,"User removed succesfully"))
 }

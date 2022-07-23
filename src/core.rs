@@ -3,6 +3,7 @@ pub mod middlewares;
 pub mod server_model;
 pub mod server_service;
 pub mod tokens;
+pub mod pagination;
 pub mod response;
 pub mod websockets_handler;
 pub mod errors;
