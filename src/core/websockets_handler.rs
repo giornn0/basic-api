@@ -27,7 +27,7 @@ pub fn get_ws_handler() -> impl Filter<Extract = impl Reply, Error = Rejection> 
 
     //passing into a filter
     let connections = warp::any().map(move || connections.clone());
-    let token = warp::query().map(move |extras: WsExtra| extras.token);
+    let token = warp::header("Sec-WebSocket-Protocol").map(move |token: String| token);
 
     warp::path("ws")
         .and(warp::ws())
