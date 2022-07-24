@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize};
 use tokio::sync::{RwLock, mpsc::UnboundedSender};
 use warp::ws::Message;
 
-use crate::core::{tokens::AuthPayload, server_model::Pool};
+use crate::core::{tokens::AuthPayload};
 
 pub fn default_pager()->(i64,i64){
     (5,1)

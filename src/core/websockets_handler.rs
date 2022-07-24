@@ -34,6 +34,7 @@ pub fn get_ws_handler() -> impl Filter<Extract = impl Reply, Error = Rejection> 
         .and(connections)
         .and(token)
         .map(|ws: Ws, connections, token: String| {
+            let ws = ws.max_message_size(1024);
             ws.on_upgrade(move |socket| connection_handler(connections, socket, token))
         })
 }
@@ -62,7 +63,6 @@ async fn connection_handler(connections: WsConnection, ws: WebSocket, token: Str
         }
     });
 
-    // if let Ok(auth) = user.get_auth(LogModel::User) {
     connections.write().await.insert(uuid, (*auth, tx));
     eprintln!("User {} connected successfully", user.fullname());
 
