@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 #Basic API services
 tokio={version="1.19.2", features=["full"]}
+tokio-stream="0.1.9"
 futures = { version = "0.3", default-features = false }
 warp="0.3.2"
 #db Orms

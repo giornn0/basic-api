@@ -21,20 +21,20 @@ pub fn organizations_router(
     db_pool: &Arc<Pool>,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
     let root = warp::path("organizations");
-    // .and(with_authenticathed(db_pool))
+    // .and(with_authenticathed())
     // .and(with_pool(db_pool.clone()));
     let index = root
         .and(get())
         .and(query())
         .and(end())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(get_index);
     let one = root
         .and(param())
         .and(get())
         .and(end())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(get_one);
     let update = root
@@ -42,21 +42,21 @@ pub fn organizations_router(
         .and(put())
         .and(end())
         .and(with_valid_json())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(update_one);
     let remove = root
         .and(param())
         .and(delete())
         .and(end())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(remove_one);
     let create = root
         .and(post())
         .and(end())
         .and(with_valid_json())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(create_one);
     one.or(index).or(create).or(update).or(remove)

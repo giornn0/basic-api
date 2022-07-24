@@ -25,22 +25,22 @@ pub fn users_router(
     headers.insert("server", HeaderValue::from_static("wee/0"));
     headers.insert("foo", HeaderValue::from_static("bar"));
     let root = warp::path("users");
-    // .and(with_authenticathed(db_pool))
+    // .and(with_authenticathed())
     // .and(with_pool(db_pool.clone()));
     let index = root
         .and(get())
         .and(query())
         .and(end())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(get_index)
-        // .with(warp::reply::with::headers(headers))
+        .with(warp::reply::with::headers(headers))
         ;
     let one = root
         .and(param())
         .and(get())
         .and(end())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(get_one);
     let update = root
@@ -48,14 +48,14 @@ pub fn users_router(
         .and(put())
         .and(end())
         .and(with_valid_json())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(update_one);
     let remove = root
         .and(param())
         .and(delete())
         .and(end())
-        .and(with_authenticathed(db_pool))
+        .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
         .and_then(remove_one);
     let create = root

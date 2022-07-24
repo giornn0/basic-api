@@ -3,12 +3,11 @@ use crate::{
         pagination::{Page, Paginated, Paginator},
         tokens::{AuthPayload, HasSession},
     },
-    config::LogModel,
+    config::{LogModel, DBPool},
     utils::{database::reject_db_error, server::reject_error},
 };
 use diesel::{
     prelude::*,
-    r2d2::{ConnectionManager, PooledConnection},
 };
 use warp::Rejection;
 
@@ -17,13 +16,13 @@ use crate::schema::users::dsl::{credential_id as CredentialId, id as Id, users a
 
 pub fn get_user(
     id: i32,
-    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+    conn: &DBPool,
 ) -> Result<User, Rejection> {
     Table.find(id).get_result(conn).map_err(reject_db_error)
 }
 pub fn create_user(
     data: NewUser,
-    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+    conn: &DBPool,
 ) -> Result<User, Rejection> {
     data.insert_into(Table)
         .get_result(conn)
@@ -32,7 +31,7 @@ pub fn create_user(
 pub fn update_user(
     data: UpdateUser,
     id: i32,
-    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+    conn: &DBPool,
 ) -> Result<User, Rejection> {
     diesel::update(Table.filter(Id.eq(id)))
         .set(data)
@@ -41,7 +40,7 @@ pub fn update_user(
 }
 pub fn remove_user(
     id: i32,
-    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+    conn: &DBPool,
 ) -> Result<usize, Rejection> {
     diesel::delete(Table.filter(Id.eq(id)))
         .execute(conn)
@@ -50,7 +49,7 @@ pub fn remove_user(
 
 pub fn get_user_page(
     queries: UserQueries,
-    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+    conn: &DBPool,
 ) -> Result<Paginated<Vec<User>>, Rejection> {
     let count: i64 = Table.count().get_result(conn).map_err(reject_db_error)?;
     let (take, page) = queries.get_page();
@@ -64,7 +63,7 @@ pub fn get_user_page(
 
 pub fn get_by_credential(
     credential: i32,
-    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+    conn: &DBPool,
 ) -> Result<User, Rejection> {
     Table
         .filter(CredentialId.eq(credential))
@@ -74,7 +73,7 @@ pub fn get_by_credential(
 
 pub fn get_user_payload(
     credential_id: i32,
-    conn: &PooledConnection<ConnectionManager<PgConnection>>,
+    conn: &DBPool,
 ) -> Result<AuthPayload, Rejection> {
     let user = get_by_credential(credential_id, conn)?;
     user.get_auth(LogModel::User).map_err(reject_error)

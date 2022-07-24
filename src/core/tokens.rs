@@ -6,7 +6,7 @@ use jsonwebtoken::{
 };
 use serde::{Deserialize, Serialize};
 use warp::Rejection;
-
+use std::cmp::Eq;
 use crate::{
     config::{LogModel, Role},
     core::{errors::Error, server_model::Pool},
@@ -20,7 +20,7 @@ pub trait FromToken {
     fn decode(token: String) -> Result<TokenData<Self>, Error>
     where
         Self: Sized;
-    fn from_token(token: String, db_pool: Arc<Pool>) -> Result<Self, Error>
+    fn from_token(token: String) -> Result<Self, Error>
     where
         Self: Sized;
 }
@@ -40,13 +40,21 @@ pub trait ToToken {
     fn to_token(self) -> Result<Token, Rejection>;
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Hash,Eq, PartialEq)]
 pub struct AuthPayload {
     id: i32,
     log_model: LogModel,
     name: String,
     role: Role,
     exp: i64,
+}
+impl AuthPayload{
+    fn default(id: i32, log_model: LogModel, role: Role)->AuthPayload{
+        AuthPayload { id, log_model, name: "pepe".to_owned(), role, exp: 5555 }
+    }
+    pub fn name(&self)->String{
+        (*self).clone().name
+    }
 }
 
 impl ToToken for AuthPayload
@@ -86,7 +94,7 @@ impl FromToken for AuthPayload {
         )
         .map_err(bad_token)
     }
-    fn from_token(bearer: String, _db_pool: Arc<Pool>) -> Result<AuthPayload, Error> {
+    fn from_token(bearer: String) -> Result<AuthPayload, Error> {
         let mut token = bearer.split_whitespace();
         let decoded = AuthPayload::decode(String::from(token.nth(1).expect("Token Malformed")))?;
         Ok(decoded.claims)
