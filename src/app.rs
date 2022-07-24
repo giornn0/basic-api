@@ -1,9 +1,9 @@
 use std::sync::Arc;
 use warp::Filter;
 
+use crate::application::login::login;
 use crate::application::organizations::router::organizations_router;
 use crate::application::users::router::users_router;
-use crate::core::credentials::login;
 use crate::core::errors::handle_rejections;
 use crate::core::server_model::Pool;
 use crate::core::server_service::up_server;

@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
-use warp::{hyper::HeaderMap, http::HeaderValue};
+use warp::{http::HeaderValue, hyper::HeaderMap};
 
 use crate::config::default_pager;
 
 // pub trait
-pub trait Paginator<T: Serialize> {
-    fn paginate(data: Vec<T>, page: i64, take: i64, count: i64) -> Paginated<Vec<T>> {
+pub trait Paginator {
+    fn paginate<T>(data: Vec<T>, page: i64, take: i64, count: i64) -> Paginated<Vec<T>> where T: Serialize,{
         let current_length = data.len();
         Paginated {
             metadata: get_page_data(page, take, count, current_length as i64),
@@ -51,11 +51,11 @@ fn get_page_data(page: i64, take: i64, total_items: i64, page_items: i64) -> Pag
         total_items,
     }
 }
-pub fn get_page_headers(metadata: PageData)->HeaderMap{
+pub fn get_page_headers(metadata: PageData) -> HeaderMap {
     let mut headers = HeaderMap::new();
-    headers.insert("x-current-page",HeaderValue::from(metadata.current_page));
-    headers.insert("x-page-items",HeaderValue::from(metadata.page_items));
-    headers.insert("x-page-count",HeaderValue::from(metadata.page_count));
-    headers.insert("x-total-items",HeaderValue::from(metadata.total_items));
+    headers.insert("x-current-page", HeaderValue::from(metadata.current_page));
+    headers.insert("x-page-items", HeaderValue::from(metadata.page_items));
+    headers.insert("x-page-count", HeaderValue::from(metadata.page_count));
+    headers.insert("x-total-items", HeaderValue::from(metadata.total_items));
     headers
 }

@@ -1,9 +1,9 @@
 use crate::{
     core::{
-        credentials::LogModel,
         pagination::{Page, Paginated, Paginator},
         tokens::{AuthPayload, HasSession},
     },
+    config::LogModel,
     utils::{database::reject_db_error, server::reject_error},
 };
 use diesel::{

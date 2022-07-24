@@ -32,5 +32,4 @@ where
     warp::body::content_length_limit(1024 * 16)
         .and(warp::body::json())
         .and_then(|value| async move { validate(value).map_err(custom) })
-        
 }

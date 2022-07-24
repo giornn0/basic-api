@@ -8,18 +8,10 @@ use serde::{Deserialize, Serialize};
 use warp::Rejection;
 
 use crate::{
+    config::{LogModel, Role},
     core::{errors::Error, server_model::Pool},
     utils::server::{reject_error, token_key},
 };
-
-use super::credentials::LogModel;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Role {
-    Admin,
-    User,
-    Client,
-}
 
 pub trait HasSession {
     fn get_auth(self, log_model: LogModel) -> Result<AuthPayload, Error>;
@@ -105,10 +97,10 @@ fn bad_token(err: JWTError) -> Error {
     println!("{}", err);
     Error::WrongToken
 }
-fn bad_model(err: String) -> Error {
-    println!("{}", err);
-    Error::BadTokenization
-}
+// fn bad_model(err: String) -> Error {
+//     println!("{}", err);
+//     Error::BadTokenization
+// }
 
 fn encode_model<AuthPayload: Serialize>(model: AuthPayload) -> Result<String, Error> {
     encode(

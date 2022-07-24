@@ -1,6 +1,7 @@
+
 table! {
     use diesel::{sql_types::{Nullable,Bool,Text, Timestamptz}, types::{ Int4, Varchar}};
-    use crate::core::credentials::LogModelMapping;
+    use crate::config::LogModelMapping;
     credentials (id) {
         id -> Int4,
         password -> Text,

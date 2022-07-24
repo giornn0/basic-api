@@ -14,13 +14,6 @@ pub enum Action<'a,T: Serialize> {
     Logged(T, &'a str),
     Calculated(T, &'a str),
 }
-impl<'a, T: Serialize> Action<'a,T>{
-    pub fn send(self) ->Result<WithStatus<Json>, Rejection> {
-        let (response, code) = Response::parse(self);
-        let reply = warp::reply::json(&response);
-        Ok(with_status(reply, code))
-    }
-}
 
 #[derive(Serialize)]
 pub struct Response<T: Serialize> {

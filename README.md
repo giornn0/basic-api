@@ -84,6 +84,8 @@
   </li>
   <li>Try to work the most part of your application <strong>inside application directory</strong><br>
   </li>
+  <li>To manage all the <strong>logins</strong>, <strong>roles</strong> and <strong>pagination</strong> defaults you have the file <strong>config</strong>, inside <strong>application directory</strong><br>
+  </li>
   <li><strong>Enjoy</strong><br>
   </li>
 </ol>

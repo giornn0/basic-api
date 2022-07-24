@@ -2,10 +2,10 @@ use std::sync::Arc;
 
 use warp::{
     reply::{Json, WithStatus},
-    Rejection,
+    Rejection, Reply,
 };
 
-use crate::utils::traits::Send;
+use crate::{utils::traits::Send, core::{pagination::get_page_headers, helpers::send_with_headers}};
 use crate::{
     core::{
         response::{Action, Response},
@@ -16,8 +16,8 @@ use crate::{
 };
 
 use super::{
-    model::{Queries, UpdateOrganization, NewOrganization},
-    service::{create_organization, get_organization, remove_organization, update_organization},
+    model::{Queries, UpdateOrganization, NewOrganization, OrganizationQueries},
+    service::{create_organization, get_organization, remove_organization, update_organization, get_organization_page},
 };
 
 pub async fn get_one(
@@ -58,9 +58,13 @@ pub async fn remove_one(
     Response::<bool>::send(Action::Removed("Organization removed succesfully"))
 }
 pub async fn get_index(
-    queries: Queries,
+    queries: OrganizationQueries,
     current_user: AuthPayload,
     pool: Arc<Pool>,
-) -> Result<WithStatus<Json>, Rejection> {
-    Response::<bool>::send(Action::Removed("Organization removed succesfully(psyche)"))
+) -> Result<impl Reply, Rejection> {
+    let conn = get_pool(pool)?;
+    let paginated = get_organization_page(queries, &conn)?;
+    let headers = get_page_headers(paginated.metadata);
+    let reply = Response::send(Action::Indexed(paginated.data))?;
+    send_with_headers(reply, headers)
 }
