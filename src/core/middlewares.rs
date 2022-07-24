@@ -2,9 +2,7 @@ use std::{convert::Infallible, sync::Arc};
 
 use serde::de::DeserializeOwned;
 use validator::Validate;
-use warp::{header, reject::custom, Filter, Rejection, query};
-
-use crate::config::WsExtra;
+use warp::{header, reject::custom, Filter, Rejection};
 
 use super::{
     helpers::validate,
@@ -18,12 +16,9 @@ pub fn with_pool(
     warp::any().map(move || db_pool.clone())
 }
 
-pub fn with_authenticathed(
-) -> impl Filter<Extract = (AuthPayload,), Error = Rejection> + Clone {
+pub fn with_authenticathed() -> impl Filter<Extract = (AuthPayload,), Error = Rejection> + Clone {
     header::<String>("authorization")
-        .and_then(|token: String| async move {
-            AuthPayload::from_token(token).map_err(custom)
-        })
+        .and_then(|token: String| async move { AuthPayload::from_token(token).map_err(custom) })
 }
 pub fn with_valid_json<T>() -> impl Filter<Extract = (T,), Error = Rejection> + Clone
 where
