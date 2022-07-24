@@ -4,7 +4,6 @@ use crate::{
 };
 use diesel::{
     prelude::*,
-    r2d2::{ConnectionManager, PooledConnection},
 };
 use warp::Rejection;
 

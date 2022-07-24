@@ -19,7 +19,7 @@ pub async fn app(pool: &Arc<Pool>) {
         .and_then(up_server)
         .or(login(&pool));
 
-    let ws = get_ws_handler(&pool);
+    let ws = get_ws_handler();
     let apis = start
         .or(users_router(&pool))
         .or(organizations_router(&pool))

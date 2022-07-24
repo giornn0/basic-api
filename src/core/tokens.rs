@@ -1,17 +1,17 @@
 use std::sync::Arc;
 
-use jsonwebtoken::{
-    decode, encode, errors::Error as JWTError, Algorithm, DecodingKey, EncodingKey, Header,
-    TokenData, Validation,
-};
-use serde::{Deserialize, Serialize};
-use warp::Rejection;
-use std::cmp::Eq;
 use crate::{
     config::{LogModel, Role},
     core::{errors::Error, server_model::Pool},
     utils::server::{reject_error, token_key},
 };
+use jsonwebtoken::{
+    decode, encode, errors::Error as JWTError, Algorithm, DecodingKey, EncodingKey, Header,
+    TokenData, Validation,
+};
+use serde::{Deserialize, Serialize};
+use std::cmp::Eq;
+use warp::Rejection;
 
 pub trait HasSession {
     fn get_auth(self, log_model: LogModel) -> Result<AuthPayload, Error>;
@@ -30,48 +30,48 @@ pub struct Token {
     token: String,
 }
 pub trait ToToken {
-    fn get_auth<T: HasSession>(
-        id: i32,
-        log_model: LogModel,
-        name: String,
-        role: Role,
-        exp: i64,
-    ) -> AuthPayload;
+    fn get_auth<T: HasSession>(id: i32, log_model: LogModel, role: Role, exp: i64) -> AuthPayload;
     fn to_token(self) -> Result<Token, Rejection>;
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Hash,Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Clone, Copy)]
 pub struct AuthPayload {
     id: i32,
     log_model: LogModel,
-    name: String,
     role: Role,
     exp: i64,
 }
-impl AuthPayload{
-    fn default(id: i32, log_model: LogModel, role: Role)->AuthPayload{
-        AuthPayload { id, log_model, name: "pepe".to_owned(), role, exp: 5555 }
+impl AuthPayload {
+    pub fn default(
+        opt_id: Option<i32>,
+        opt_log_model: Option<LogModel>,
+        opt_role: Option<Role>,
+    ) -> AuthPayload {
+        AuthPayload {
+            id: opt_id.unwrap_or(5),
+            log_model: opt_log_model.unwrap_or(LogModel::Worker),
+            role: opt_role.unwrap_or(Role::Client),
+            exp: 5555,
+        }
     }
-    pub fn name(&self)->String{
-        (*self).clone().name
+    pub fn id(&self)->i32{
+        self.id
+    }
+    pub fn log_model(&self)->LogModel{
+        self.log_model
+    }
+    pub fn role(&self)->Role{
+        self.role
     }
 }
-
 impl ToToken for AuthPayload
 where
     Token: Serialize,
 {
-    fn get_auth<T: HasSession>(
-        id: i32,
-        log_model: LogModel,
-        name: String,
-        role: Role,
-        exp: i64,
-    ) -> AuthPayload {
+    fn get_auth<T: HasSession>(id: i32, log_model: LogModel, role: Role, exp: i64) -> AuthPayload {
         AuthPayload {
             id,
             log_model,
-            name,
             role,
             exp,
         }

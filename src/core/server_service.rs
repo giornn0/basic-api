@@ -21,3 +21,11 @@ pub fn start_db()->Arc<DbPool>{
     )
 
 }  
+pub fn start_simple_db()->DbPool{
+    let db_url = std::env::var("DATABASE_URL").expect("Missing database credentials!");
+    let manager = ConnectionManager::<PgConnection>::new(db_url);
+
+    Pool::builder()
+        .build(manager)
+        .expect("Failed connection to the database.")
+}  

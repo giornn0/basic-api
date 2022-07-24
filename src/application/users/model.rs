@@ -28,6 +28,9 @@ impl User{
     pub fn fullname(&self)->String{
         format!("{},{}",self.lastname, self.name)
     }
+    pub fn id(&self)->usize{
+        self.id() as usize
+    }
 }
 impl Paginator for User {}
 
@@ -52,7 +55,6 @@ impl HasSession for User {
                 Ok(AuthPayload::get_auth::<User>(
                     self.id,
                     log_model,
-                    format!("{}, {}", self.lastname, self.name),
                     Role::User,
                     exp,
                 ))

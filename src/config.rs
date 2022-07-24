@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize};
 use tokio::sync::{RwLock, mpsc::UnboundedSender};
 use warp::ws::Message;
 
-use crate::core::tokens::AuthPayload;
+use crate::core::{tokens::AuthPayload, server_model::Pool};
 
 pub fn default_pager()->(i64,i64){
     (5,1)
@@ -14,14 +14,14 @@ pub fn default_pager()->(i64,i64){
 
 pub type DBPool = PooledConnection<ConnectionManager<PgConnection>>;
 
-#[derive(DbEnum, Debug, Serialize, Deserialize, Clone, Hash,Eq, PartialEq)]
+#[derive(DbEnum, Debug, Serialize, Deserialize, Clone, Hash,Eq, PartialEq,Copy)]
 pub enum LogModel {
     User,   //'user
     Client, //'client
     Worker, //'worker
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Hash,Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Hash,Eq, PartialEq, Copy)]
 pub enum Role {
     Admin,
     User,
@@ -36,9 +36,7 @@ pub enum Role {
 //     content: String
 // }
 
-pub type WsConnection = Arc<RwLock<HashMap<usize, UnboundedSender<Message>>>>;
-pub type WsAuthPayload = Arc<RwLock<AuthPayload>>;
-pub type WsDBPool = Arc<RwLock<DBPool>>;
+pub type WsConnection = Arc<RwLock<HashMap<usize, (AuthPayload,UnboundedSender<Message>)>>>;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct WsExtra{

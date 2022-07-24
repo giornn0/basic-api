@@ -3,7 +3,7 @@ use std::sync::Arc;
 use DbError::NotFound;
 use diesel::{r2d2::{PooledConnection, ConnectionManager}, PgConnection, result::Error as DbError};
 use warp::{Rejection, reject::custom};
-use crate::core::{server_model::Pool, errors::Error};
+use crate::core::{server_model::Pool, errors::Error, server_service::start_simple_db};
 
 fn modify_error(db_error: diesel::r2d2::PoolError)->Rejection{
     println!("{}",db_error);
@@ -12,6 +12,9 @@ fn modify_error(db_error: diesel::r2d2::PoolError)->Rejection{
 
 pub fn get_pool(pool: Arc<Pool>)->Result<PooledConnection<ConnectionManager<PgConnection>>, Rejection>{
     pool.get().map_err(modify_error)
+}
+pub fn get_ws_pool()->Result<PooledConnection<ConnectionManager<PgConnection>>, Rejection>{
+    start_simple_db().get().map_err(modify_error)
 }
 
 pub fn reject_db_error(db_error: DbError)->Rejection{
