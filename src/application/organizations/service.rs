@@ -1,6 +1,6 @@
 use crate::{
-    core::pagination::{Page, Paginated, Paginator},
-    utils::database::reject_db_error, config::DBPool,
+    core::{pagination::{Page, Paginated, Paginator}, errors::Error},
+    utils::database::{reject_db_error, db_error}, config::DBPool,
 };
 use diesel::{
     prelude::*,
@@ -19,20 +19,20 @@ pub fn get_organization(
 pub fn create_organization(
     data: NewOrganization,
     conn: &DBPool,
-) -> Result<Organization, Rejection> {
+) -> Result<Organization, Error> {
     data.insert_into(Table)
         .get_result(conn)
-        .map_err(reject_db_error)
+        .map_err(db_error)
 }
 pub fn update_organization(
     data: UpdateOrganization,
     id: i32,
     conn: &DBPool,
-) -> Result<Organization, Rejection> {
+) -> Result<Organization, Error> {
     diesel::update(Table.filter(Id.eq(id)))
         .set(data)
         .get_result(conn)
-        .map_err(reject_db_error)
+        .map_err(db_error)
 }
 pub fn remove_organization(
     id: i32,

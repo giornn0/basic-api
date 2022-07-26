@@ -17,10 +17,6 @@ pub struct Organization {
 }
 impl Paginator for Organization {}
 #[derive(Serialize, Deserialize)]
-pub struct Queries {}
-impl Page for Queries{}
-
-#[derive(Serialize, Deserialize)]
 pub struct OrganizationQueries {
     pub page: Option<i64>,
     pub take: Option<i64>,

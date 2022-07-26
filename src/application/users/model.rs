@@ -28,7 +28,7 @@ impl User{
         format!("{},{}",self.lastname, self.name)
     }
     pub fn id(&self)->usize{
-        self.id() as usize
+        self.id as usize
     }
 }
 impl Paginator for User {}

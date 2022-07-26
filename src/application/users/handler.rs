@@ -47,6 +47,7 @@ pub async fn create_one(
             unique_credential_mail(data.email(), &conn)?;
             let values_credential = data.get_credential()?;
             let new_credential = new_credential(values_credential, &conn)?;
+            // return Err(Error::DbNotFound);
             create_user(data.get_register(new_credential.id()), &conn)
         })
         .map_err(reject_error)?;
@@ -70,7 +71,7 @@ pub async fn remove_one(
     pool: Arc<Pool>,
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;
-    let removed = remove_user(id, &conn)?;
+    remove_user(id, &conn)?;
     Response::<bool>::send(Action::Removed("User removed succesfully"))
 }
 pub async fn get_index(

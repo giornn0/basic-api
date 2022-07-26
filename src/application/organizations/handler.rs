@@ -1,11 +1,15 @@
 use std::sync::Arc;
 
+use diesel::Connection;
 use warp::{
     reply::{Json, WithStatus},
     Rejection, Reply,
 };
 
-use crate::{utils::traits::Send, core::{pagination::get_page_headers, helpers::send_with_headers}};
+use crate::{
+    core::{errors::Error, helpers::send_with_headers, pagination::get_page_headers},
+    utils::{server::reject_error, traits::Send},
+};
 use crate::{
     core::{
         response::{Action, Response},
@@ -16,8 +20,11 @@ use crate::{
 };
 
 use super::{
-    model::{Queries, UpdateOrganization, NewOrganization, OrganizationQueries},
-    service::{create_organization, get_organization, remove_organization, update_organization, get_organization_page},
+    model::{NewOrganization, Organization, OrganizationQueries, UpdateOrganization},
+    service::{
+        create_organization, get_organization, get_organization_page, remove_organization,
+        update_organization,
+    },
 };
 
 pub async fn get_one(
@@ -36,7 +43,10 @@ pub async fn create_one(
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;
     let new_organization = create_organization(data, &conn)?;
-    Response::send(Action::Created(new_organization, "Organization created succesfully"))
+    Response::send(Action::Created(
+        new_organization,
+        "Organization created succesfully",
+    ))
 }
 pub async fn update_one(
     id: i32,
@@ -45,8 +55,14 @@ pub async fn update_one(
     pool: Arc<Pool>,
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;
-    let updated_organization = update_organization(data, id, &conn)?;
-    Response::send(Action::Updated(updated_organization, "Organization updated succesfully"))
+
+    let updated_organization = conn
+        .transaction::<Organization, Error, _>(|| update_organization(data, id, &conn))
+        .map_err(reject_error)?;
+    Response::send(Action::Updated(
+        updated_organization,
+        "Organization updated succesfully",
+    ))
 }
 pub async fn remove_one(
     id: i32,
@@ -54,7 +70,7 @@ pub async fn remove_one(
     pool: Arc<Pool>,
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;
-    let removed = remove_organization(id, &conn)?;
+    remove_organization(id, &conn)?;
     Response::<bool>::send(Action::Removed("Organization removed succesfully"))
 }
 pub async fn get_index(

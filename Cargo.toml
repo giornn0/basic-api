@@ -28,7 +28,7 @@ dotenv="0.15.0"
 argon2 = "0.4"
 rand_core = { version = "0.6", features = ["std"] }
 #request validation
-validator = { version = "0.15", features = ["derive"] }
+validator = { version = "0.16", features = ["derive"] }
 #Http Errors
 http-api-problem = { version =  "0.53.0", features = ["hyper", "warp"] }
 #Token validation
