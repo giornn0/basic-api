@@ -20,14 +20,22 @@ pub enum LogModel {
     Client, //'client
     Worker, //'worker
 }
-
+impl Default for LogModel{
+    fn default()->Self{
+        LogModel::Worker
+    }
+}
 #[derive(Serialize, Deserialize, Debug, Clone, Hash,Eq, PartialEq, Copy)]
 pub enum Role {
     Admin,
     User,
     Client,
 }
-
+impl Default for Role{
+    fn default()->Self{
+        Role::Client
+    }
+}
 //Models that commnicates through ws
 // #[derive(Serialize, Deserialize, Debug, Clone, Hash,Eq, PartialEq)]
 // pub struct Message{
@@ -37,8 +45,3 @@ pub enum Role {
 // }
 
 pub type WsConnection = Arc<RwLock<HashMap<usize, (AuthPayload,UnboundedSender<Message>)>>>;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct WsExtra{
-    pub token: String,
-}

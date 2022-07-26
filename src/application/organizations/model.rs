@@ -16,6 +16,7 @@ pub struct Organization {
     //contact_id: i32,
 }
 impl Paginator for Organization {}
+
 #[derive(Serialize, Deserialize)]
 pub struct OrganizationQueries {
     pub page: Option<i64>,

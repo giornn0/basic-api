@@ -26,6 +26,6 @@ pub fn reject_db_error(db_error: DbError) -> Rejection {
    custom(Error::from(db_error))
 }
 
-pub fn db_error(error: DbError)->Error{
+pub fn to_error(error: DbError)->Error{
     Error::from(error)
 }

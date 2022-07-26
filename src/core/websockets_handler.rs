@@ -13,7 +13,7 @@ use warp::{
 
 use crate::{
     application::users::service::get_user,
-    config::{DBPool, LogModel, WsConnection, WsExtra},
+    config::{DBPool, LogModel, WsConnection},
     core::tokens::{AuthPayload, FromToken},
     utils::database::get_ws_pool,
 };

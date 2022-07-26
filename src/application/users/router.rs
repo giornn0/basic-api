@@ -6,7 +6,6 @@ use warp::{
     post, query, Filter, Rejection, Reply,
     put,
     delete,
-    http::header::{HeaderMap, HeaderValue}
 };
 
 use crate::core::{
@@ -21,9 +20,7 @@ use super::{
 pub fn users_router(
     db_pool: &Arc<Pool>,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    let mut headers = HeaderMap::new();
-    headers.insert("server", HeaderValue::from_static("wee/0"));
-    headers.insert("foo", HeaderValue::from_static("bar"));
+    
     let root = warp::path("users");
     // .and(with_authenticathed())
     // .and(with_pool(db_pool.clone()));
@@ -33,9 +30,7 @@ pub fn users_router(
         .and(end())
         .and(with_authenticathed())
         .and(with_pool(db_pool.clone()))
-        .and_then(get_index)
-        .with(warp::reply::with::headers(headers))
-        ;
+        .and_then(get_index);
     let one = root
         .and(param())
         .and(get())

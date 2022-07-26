@@ -1,7 +1,7 @@
 use crate::{
     config::{LogModel, Role},
     core::errors::Error,
-    utils::server::{reject_error, token_key},
+    utils::server::{reject_error, token_key, token_key_refresh},
 };
 use jsonwebtoken::{
     decode, encode, errors::Error as JWTError, Algorithm, DecodingKey, EncodingKey, Header,
@@ -15,10 +15,13 @@ pub trait HasSession {
     fn get_auth(self, log_model: LogModel) -> Result<AuthPayload, Error>;
 }
 pub trait FromToken {
-    fn decode(token: String) -> Result<TokenData<Self>, Error>
+    fn decode(token: String, key: String) -> Result<TokenData<Self>, Error>
     where
         Self: Sized;
     fn from_token(token: String) -> Result<Self, Error>
+    where
+        Self: Sized;
+    fn from_refresh(token: String) -> Result<Self, Error>
     where
         Self: Sized;
 }
@@ -29,7 +32,7 @@ pub struct Token {
 }
 pub trait ToToken {
     fn get_auth<T: HasSession>(id: i32, log_model: LogModel, role: Role, exp: i64) -> AuthPayload;
-    fn to_token(self) -> Result<Token, Rejection>;
+    fn to_token(&self, key: String) -> Result<Token, Rejection>;
 }
 
 #[derive(Serialize, Deserialize, Debug, Hash, Eq, PartialEq, Clone, Copy)]
@@ -47,8 +50,8 @@ impl AuthPayload {
     ) -> AuthPayload {
         AuthPayload {
             id: opt_id.unwrap_or(5),
-            log_model: opt_log_model.unwrap_or(LogModel::Worker),
-            role: opt_role.unwrap_or(Role::Client),
+            log_model: opt_log_model.unwrap_or(LogModel::default()),
+            role: opt_role.unwrap_or(Role::default()),
             exp: 5555,
         }
     }
@@ -74,27 +77,38 @@ where
             exp,
         }
     }
-    fn to_token(self) -> Result<Token, Rejection> {
-        let token = encode_model(self).map_err(reject_error)?;
+    fn to_token(&self, key: String) -> Result<Token, Rejection> {
+        let token = encode_model(&self, key).map_err(reject_error)?;
         Ok(Token { token })
     }
 }
 
 impl FromToken for AuthPayload {
-    fn decode(token: String) -> Result<TokenData<Self>, Error>
+    fn decode(token: String, key: String) -> Result<TokenData<Self>, Error>
     where
         Self: Sized,
     {
         decode::<AuthPayload>(
             &token,
-            &DecodingKey::from_secret(token_key().as_bytes()),
+            &DecodingKey::from_secret(key.as_bytes()),
             &Validation::new(Algorithm::HS256),
         )
         .map_err(bad_token)
     }
     fn from_token(bearer: String) -> Result<AuthPayload, Error> {
         let mut token = bearer.split_whitespace();
-        let decoded = AuthPayload::decode(String::from(token.nth(1).expect("Token Malformed")))?;
+        let decoded = AuthPayload::decode(
+            String::from(token.nth(1).expect("Token Malformed")),
+            token_key(),
+        )?;
+        Ok(decoded.claims)
+    }
+    fn from_refresh(bearer: String) -> Result<AuthPayload, Error> {
+        let mut token = bearer.split_whitespace();
+        let decoded = AuthPayload::decode(
+            String::from(token.nth(1).expect("Token Malformed")),
+            token_key_refresh(),
+        )?;
         Ok(decoded.claims)
     }
 }
@@ -108,11 +122,22 @@ fn bad_token(err: JWTError) -> Error {
 //     Error::BadTokenization
 // }
 
-fn encode_model<AuthPayload: Serialize>(model: AuthPayload) -> Result<String, Error> {
+fn encode_model<AuthPayload: Serialize>(model: &AuthPayload, key: String) -> Result<String, Error> {
     encode(
         &Header::new(Algorithm::HS256),
-        &model,
-        &EncodingKey::from_secret(token_key().as_bytes()),
+        model,
+        &EncodingKey::from_secret(key.as_bytes()),
     )
     .map_err(bad_token)
+}
+
+#[derive(Serialize)]
+pub struct LoginTokens{
+    auth: Token,
+    refresh: Token,
+}
+impl LoginTokens{
+    pub fn new(auth: Token, refresh: Token)-> Self{
+        LoginTokens { auth, refresh }
+    }
 }

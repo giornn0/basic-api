@@ -11,6 +11,9 @@ pub fn port() -> Result<u16, ParseIntError> {
 pub fn token_key() -> String {
     std::env::var("JWT_KEY").ok().unwrap_or("without_secret".to_owned())
 }
+pub fn token_key_refresh() -> String {
+    std::env::var("JWT_KEY_REFRESH").ok().unwrap_or("without_secret_refresh_".to_owned())
+}
 pub fn reject_error(error: Error)->Rejection{
     custom(error)
 }

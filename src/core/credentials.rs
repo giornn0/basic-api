@@ -4,7 +4,7 @@ use crate::{
         self as credentials,
         dsl::{credentials as Table, email as Email},
     },
-    utils::{database:: db_error, traits::HashedValue},
+    utils::{database:: to_error, traits::HashedValue},
 };
 use diesel::{
     prelude::*,
@@ -81,7 +81,7 @@ pub fn new_credential(
     value
         .insert_into(Table)
         .get_result(conn)
-        .map_err(db_error)
+        .map_err(to_error)
 }
 pub fn unique_credential_mail(
     email: &String,
@@ -90,7 +90,7 @@ pub fn unique_credential_mail(
     let registers = credentials::table
         .filter(Email.eq_all(email))
         .load::<Credential>(conn)
-        .map_err(db_error)?;
+        .map_err(to_error)?;
 
     if registers.len() > 0 {
         // the value of the username will automatically be added later

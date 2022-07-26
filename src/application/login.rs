@@ -24,11 +24,11 @@ use crate::{
         middlewares::{with_pool, with_valid_json},
         response::{Action, Response},
         server_model::Pool,
-        tokens::{AuthPayload, ToToken},
+        tokens::{AuthPayload, ToToken, LoginTokens},
     },
     utils::{
         database::{get_pool, reject_db_error},
-        passwords::auth_hash,
+        passwords::auth_hash, server::{token_key, token_key_refresh},
     },
 };
 use crate::{
@@ -77,8 +77,11 @@ async fn login_handler(
             "Modelo sin implementar".to_owned(),
         ))),
     }?;
-    let token = session.to_token()?;
-    Response::send(Action::Logged(token, "Bienvenido"))
+    
+    let auth = session.to_token(token_key())?;
+    let refresh = session.to_token(token_key_refresh())?;
+
+    Response::send(Action::Logged(LoginTokens::new(auth,refresh), "Bienvenido"))
 }
 
 pub fn login(pool: &Arc<Pool>) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {

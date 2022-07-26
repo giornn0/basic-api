@@ -5,7 +5,7 @@ use crate::{
         errors::Error
     },
     config::{LogModel, DBPool},
-    utils::{database::{reject_db_error, db_error}, server::reject_error},
+    utils::{database::{reject_db_error, to_error}, server::reject_error},
 };
 use diesel::{
     prelude::*,
@@ -27,7 +27,7 @@ pub fn create_user(
 ) -> Result<User, Error> {
     data.insert_into(Table)
         .get_result(conn)
-        .map_err(db_error)
+        .map_err(to_error)
     }
 pub fn update_user(
     data: UpdateUser,
@@ -37,7 +37,7 @@ pub fn update_user(
     diesel::update(Table.filter(Id.eq(id)))
     .set(data)
     .get_result(conn)
-    .map_err(db_error)
+    .map_err(to_error)
 }
 pub fn remove_user(
     id: i32,

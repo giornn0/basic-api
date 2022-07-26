@@ -20,6 +20,10 @@ pub fn with_authenticathed() -> impl Filter<Extract = (AuthPayload,), Error = Re
     header::<String>("authorization")
         .and_then(|token: String| async move { AuthPayload::from_token(token).map_err(custom) })
 }
+pub fn with_refreshed() -> impl Filter<Extract = (AuthPayload,), Error = Rejection> + Clone {
+    header::<String>("authorization")
+        .and_then(|token: String| async move { AuthPayload::from_refresh(token).map_err(custom) })
+}
 pub fn with_valid_json<T>() -> impl Filter<Extract = (T,), Error = Rejection> + Clone
 where
     T: DeserializeOwned + Validate + Send,

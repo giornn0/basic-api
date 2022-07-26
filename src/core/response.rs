@@ -12,6 +12,7 @@ pub enum Action<'a,T: Serialize> {
     Indexed(T),
     Finded(T, &'a str),
     Logged(T, &'a str),
+    Refreshed(T, &'a str),
     Calculated(T, &'a str),
 }
 
@@ -19,6 +20,11 @@ pub enum Action<'a,T: Serialize> {
 pub struct Response<T: Serialize> {
     data: Option<T>,
     message: Option<String>,
+}
+impl<T: Serialize> Default for Response<T>{
+    fn default()->Self{
+        Response{data: None, message: Some("Welcome to giornn0's API".to_owned())}
+    }
 }
 impl<T: Serialize> Response<T> {
     fn create(msg: Option<&str>, data: Option<T>) -> Response<T> {
@@ -38,6 +44,7 @@ impl<T: Serialize> Response<T> {
                 (Response::create(Some(msg), Some(data)), StatusCode::ACCEPTED)
             }
             Action::Updated(data, msg) => (Response::create(Some(msg), Some(data)), StatusCode::OK),
+            Action::Refreshed(data, msg) => (Response::create(Some(msg), Some(data)), StatusCode::OK),
             Action::Removed(msg) => (Response::create(Some(msg), None), StatusCode::OK),
             Action::Indexed(data) => (Response::create(None, Some(data)), StatusCode::OK),
             Action::Finded(data, msg) => (Response::create(Some(msg), Some(data)), StatusCode::OK),
