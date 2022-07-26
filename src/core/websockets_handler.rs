@@ -1,8 +1,6 @@
 use std::{
     mem::drop,
-    sync::{
-        atomic::{AtomicUsize, Ordering},
-    },
+    sync::atomic::{AtomicUsize, Ordering},
 };
 
 use futures::{SinkExt, StreamExt, TryFutureExt};

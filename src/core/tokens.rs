@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
 use crate::{
     config::{LogModel, Role},
-    core::{errors::Error, server_model::Pool},
+    core::errors::Error,
     utils::server::{reject_error, token_key},
 };
 use jsonwebtoken::{
@@ -54,13 +52,13 @@ impl AuthPayload {
             exp: 5555,
         }
     }
-    pub fn id(&self)->i32{
+    pub fn id(&self) -> i32 {
         self.id
     }
-    pub fn log_model(&self)->LogModel{
+    pub fn log_model(&self) -> LogModel {
         self.log_model
     }
-    pub fn role(&self)->Role{
+    pub fn role(&self) -> Role {
         self.role
     }
 }

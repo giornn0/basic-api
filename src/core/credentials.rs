@@ -4,7 +4,7 @@ use crate::{
         self as credentials,
         dsl::{credentials as Table, email as Email},
     },
-    utils::{database::reject_db_error, traits::HashedValue},
+    utils::{database:: db_error, traits::HashedValue},
 };
 use diesel::{
     prelude::*,
@@ -14,7 +14,6 @@ use diesel::{
 use http_api_problem::StatusCode;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
-use warp::{reject::custom, Rejection};
 
 use super::errors::Error;
 
@@ -57,7 +56,7 @@ impl NewCredential {
         email: String,
         log_model: LogModel,
         state: Option<bool>,
-    ) -> Result<Self, Rejection> {
+    ) -> Result<Self, Error> {
         let password = NewCredential::hashed_value(unhashed)?;
         Ok(NewCredential {
             password,
@@ -69,7 +68,7 @@ impl NewCredential {
 }
 
 pub trait GetCredential<T: Validate> {
-    fn get_credential(&self) -> Result<NewCredential, Rejection>;
+    fn get_credential(&self) -> Result<NewCredential, Error>;
 }
 pub trait GetRegister<T: Validate, I: Insertable<G>, G> {
     fn get_register(&self, credential_id: i32) -> I;
@@ -78,27 +77,27 @@ pub trait GetRegister<T: Validate, I: Insertable<G>, G> {
 pub fn new_credential(
     value: NewCredential,
     conn: &PooledConnection<ConnectionManager<PgConnection>>,
-) -> Result<Credential, Rejection> {
+) -> Result<Credential, Error> {
     value
         .insert_into(Table)
         .get_result(conn)
-        .map_err(reject_db_error)
+        .map_err(db_error)
 }
 pub fn unique_credential_mail(
     email: &String,
     conn: &PooledConnection<ConnectionManager<PgConnection>>,
-) -> Result<(), Rejection> {
+) -> Result<(), Error> {
     let registers = credentials::table
         .filter(Email.eq_all(email))
         .load::<Credential>(conn)
-        .map_err(reject_db_error)?;
+        .map_err(db_error)?;
 
     if registers.len() > 0 {
         // the value of the username will automatically be added later
-        return Err(custom(Error::Redaction(
+        return Err(Error::Redaction(
             StatusCode::BAD_REQUEST,
             format!("The {} is already used", email),
-        )));
+        ));
     }
     Ok(())
 }

@@ -12,7 +12,6 @@ use chrono::{Duration, Utc};
 use http_api_problem::StatusCode;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
-use warp::Rejection;
 
 #[derive(Queryable, Serialize, Deserialize)]
 pub struct User {
@@ -102,7 +101,7 @@ impl UserRegister {
     }
 }
 impl GetCredential<UserRegister> for UserRegister {
-    fn get_credential(&self) -> Result<NewCredential, Rejection> {
+    fn get_credential(&self) -> Result<NewCredential, Error> {
         let clone = (*self).clone();
         NewCredential::new(clone.password, clone.email, clone.log_model, clone.state)
     }

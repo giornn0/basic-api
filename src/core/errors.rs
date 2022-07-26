@@ -9,6 +9,7 @@ use warp::{
     reply::{ with_status},
     Rejection, Reply,
 };
+use diesel::result::Error as DbError;
 
 #[derive(ThisError, Debug)]
 pub enum Error {
@@ -34,6 +35,15 @@ pub enum Error {
     Redaction(StatusCode,String),
 }
 impl Reject for Error {}
+impl From<DbError> for Error{
+    fn from(error: DbError) -> Self {
+        println!("{}", error);
+        if error.eq(&DbError::NotFound) {
+            return Error::DbNotFound;
+        }
+        Error::WhileQuerying
+    }
+}
 
 #[derive(Serialize)]
 struct ErrorMessage {

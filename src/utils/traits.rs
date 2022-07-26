@@ -1,6 +1,5 @@
 use serde::Serialize;
 use warp::{
-    reject::custom,
     reply::{Json, WithStatus},
     Rejection,
 };
@@ -18,10 +17,10 @@ pub trait Send<'a, T: Serialize> {
     fn send(action: Action<'a, T>) -> Result<WithStatus<Json>, Rejection>;
 }
 pub trait HashedValue {
-    fn hashed_value(unhashed: String) -> Result<String, Rejection> {
+    fn hashed_value(unhashed: String) -> Result<String, Error> {
         if let Some(hash) = hash(&unhashed) {
             return Ok(hash);
         }
-        Err(custom(Error::InvalidRequest))
+        Err(Error::InvalidRequest)
     }
 }

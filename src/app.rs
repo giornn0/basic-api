@@ -33,8 +33,11 @@ pub async fn app(pool: &Arc<Pool>) {
 
     let routes = apis.with(cors);
 
-    let (addr, server) =
-        warp::serve(routes).bind_with_graceful_shutdown(([0, 0, 0, 0], port), async {
+    let (addr, server) = warp::serve(routes)
+        .tls()
+        .cert_path("tls/cert.pem")
+        .key_path("tls/key.pem")
+        .bind_with_graceful_shutdown(([0, 0, 0, 0], port), async {
             tokio::signal::ctrl_c()
                 .await
                 .expect("Not used Ctrl + C for close");

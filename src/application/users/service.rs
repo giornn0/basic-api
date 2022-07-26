@@ -2,9 +2,10 @@ use crate::{
     core::{
         pagination::{Page, Paginated, Paginator},
         tokens::{AuthPayload, HasSession},
+        errors::Error
     },
     config::{LogModel, DBPool},
-    utils::{database::reject_db_error, server::reject_error},
+    utils::{database::{reject_db_error, db_error}, server::reject_error},
 };
 use diesel::{
     prelude::*,
@@ -23,20 +24,20 @@ pub fn get_user(
 pub fn create_user(
     data: NewUser,
     conn: &DBPool,
-) -> Result<User, Rejection> {
+) -> Result<User, Error> {
     data.insert_into(Table)
         .get_result(conn)
-        .map_err(reject_db_error)
-}
+        .map_err(db_error)
+    }
 pub fn update_user(
     data: UpdateUser,
     id: i32,
     conn: &DBPool,
-) -> Result<User, Rejection> {
+) -> Result<User, Error> {
     diesel::update(Table.filter(Id.eq(id)))
-        .set(data)
-        .get_result(conn)
-        .map_err(reject_db_error)
+    .set(data)
+    .get_result(conn)
+    .map_err(db_error)
 }
 pub fn remove_user(
     id: i32,

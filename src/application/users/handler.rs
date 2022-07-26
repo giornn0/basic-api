@@ -1,11 +1,18 @@
 use std::sync::Arc;
 
+use diesel::Connection;
 use warp::{
     reply::{Json, WithStatus},
     Rejection, Reply,
 };
 
-use crate::{utils::traits::Send, core::{credentials::unique_credential_mail, pagination::get_page_headers, helpers::send_with_headers}};
+use crate::{
+    core::{
+        credentials::unique_credential_mail, errors::Error, helpers::send_with_headers,
+        pagination::get_page_headers,
+    },
+    utils::{server::reject_error, traits::Send},
+};
 use crate::{
     core::{
         credentials::{new_credential, GetCredential, GetRegister},
@@ -17,8 +24,8 @@ use crate::{
 };
 
 use super::{
-    model::{UserQueries, UpdateUser, UserRegister},
-    service::{create_user, get_user, remove_user, update_user, get_user_page},
+    model::{UpdateUser, User, UserQueries, UserRegister},
+    service::{create_user, get_user, get_user_page, remove_user, update_user},
 };
 
 pub async fn get_one(
@@ -35,10 +42,14 @@ pub async fn create_one(
     pool: Arc<Pool>,
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;
-    unique_credential_mail(data.email(), &conn)?;
-    let values_credential = data.get_credential()?;
-    let new_credential = new_credential(values_credential, &conn)?;
-    let new_user = create_user(data.get_register(new_credential.id()), &conn)?;
+    let new_user = conn
+        .transaction::<User, Error, _>(|| {
+            unique_credential_mail(data.email(), &conn)?;
+            let values_credential = data.get_credential()?;
+            let new_credential = new_credential(values_credential, &conn)?;
+            create_user(data.get_register(new_credential.id()), &conn)
+        })
+        .map_err(reject_error)?;
     Response::send(Action::Created(new_user, "User created succesfully"))
 }
 pub async fn update_one(
@@ -48,7 +59,9 @@ pub async fn update_one(
     pool: Arc<Pool>,
 ) -> Result<WithStatus<Json>, Rejection> {
     let conn = get_pool(pool)?;
-    let updated_user = update_user(data, id, &conn)?;
+    let updated_user = conn
+        .transaction::<User, Error, _>(|| update_user(data, id, &conn))
+        .map_err(reject_error)?;
     Response::send(Action::Updated(updated_user, "User updated succesfully"))
 }
 pub async fn remove_one(
