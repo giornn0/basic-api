@@ -4,4 +4,9 @@ services:
     depends_on:
       - db
   db:
-    image: postgres
+  image: postgres
+  restart: always
+  environment:
+    POSTGRES_USER: user_example
+    POSTGRES_PASSWORD: password_example
+    POSTGRES_DB: db_example

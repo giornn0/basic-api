@@ -34,7 +34,9 @@
   <li>
     <a href="https://www.postgresql.org/">
     <strong>PostgreSQL</strong>(if opted for a Postgres database)<br>
-    </a>
+    </a><br>
+    <code>docker run -p DB_PORT:5432 --name testing -e POSTGRES_USER=DB_USER -e POSTGRES_PASSWORD=DB_PASSWORD -e POSTGRES_DB=DB_NAME -d postgres
+    </code>
   </li>
   <li>
     <a href="https://www.mysql.com/">
@@ -42,11 +44,17 @@
     </a>
   </li>
   <li>
+    After the choiced db is up and running start the database with <br>
+    <code>
+    diesel setup
+    </code>
+  </li>
+  <li>
     <a href="https://www.mysql.com/">
     <strong>Cargo Watch</strong>(strongly recommended for easy development)<br>
     </a>
   </li>
-    <li>
+  <li>
         After any migration runned change credential table (or any table using a special type) to the follow (add/ remove the custom columnss at pleasure) <br>
     <code>
     table! {
