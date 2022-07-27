@@ -42,15 +42,16 @@ pub fn start_simple_db() -> DbPool {
         .build(manager)
         .expect("Failed connection to the database.")
 }
-// pub fn refresh_token(
-//     pool: &Arc<DbPool>,
-// ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-//     warp::path("refresh")
-//         .and(get())
-//         .and(end())
-//         .and(with_refreshed())
-//         .map(|payload: AuthPayload| {
-//             let token = payload.to_token(token_key())?;
-//             Response::send(Action::Refreshed(token, ""))
-//         })
-// }
+pub fn refresh_token(
+    pool: &Arc<DbPool>,
+) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    warp::path("refresh")
+        .and(get())
+        .and(end())
+        .and(with_refreshed())
+        .and_then(get_new_token)
+}
+pub async fn get_new_token(payload: AuthPayload)->Result<impl Reply, Rejection>{
+    let token = payload.to_token(token_key())?;
+    Response::send(Action::Refreshed(token, ""))
+}
