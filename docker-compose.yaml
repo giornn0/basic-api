@@ -1,0 +1,24 @@
+version: '3.9'
+services:
+  db:
+    image: postgres
+    networks:
+      - data-tier
+    restart: always
+    ports:
+      - "3000:5432"
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpassword
+      POSTGRES_DB: db-example
+  web:
+    build: .
+    networks:
+      - data-tier
+    ports: 
+      - "8080:8080"
+    depends_on:
+      - db
+networks:
+  # The presence of these objects is sufficient to define them
+  data-tier: {}
