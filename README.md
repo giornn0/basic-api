@@ -60,23 +60,22 @@
   </li>
   <li>
         After any migration runned change credential table (or any table using a special type) to the follow (add/ remove the custom columnss at pleasure) <br/>
-    <h4>
-    <code>
-    table! {<br/>
-    use diesel::{sql_types::{Nullable,Bool,Text, Timestamptz}, types::{ Int4, Varchar}};<br/>
-    use crate::core::credentials::LogModelMapping;<br/>
-    credentials (id) {<br/>
-        id -> Int4,<br/>
-        password -> Text,<br/>
-        email -> Varchar,<br/>
-        state -> Nullable&#60;Bool&#62;,<br/>
-        log_model -> LogModelMapping,<br/>
-        created_at -> Timestamptz,<br/>
-        updated_at -> Timestamptz,<br/>
+    
+    
+    table! {
+    use diesel::{sql_types::{Nullable,Bool,Text, Timestamptz}, types::{ Int4, Varchar}};
+    use crate::core::credentials::LogModelMapping;
+    credentials (id) {
+        id -> Int4,
+        password -> Text,
+        email -> Varchar,
+        state -> Nullable&#60;Bool&#62;,
+        log_model -> LogModelMapping,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
+      }
     }
-}
-    </code>
-    </h4>
+    
   </li>
 </ul>
 <hr/><br/>
