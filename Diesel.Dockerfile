@@ -5,10 +5,10 @@ WORKDIR ./migrate
 RUN rm -r *
 
 ADD ./Cargo.toml ./Cargo.toml
-ADD ./migrations ./migrations
 ADD .env .env
 
 RUN cargo install diesel_cli
 
+COPY ./migrations ./migrations
 
 CMD ["diesel","setup"]
