@@ -89,22 +89,13 @@
     <h4><code>docker build -t migrator -f ./Diesel.Dockerfile .</code></h4> <br/>
   </li>
   <li>Start <strong>database</strong> <small>(postgresql in this case)</small><br/>
-    <h4>
-    <code>docker run -p dbport:5432 --name testing -e POSTGRES_USER=dbuser -e POSTGRES_PASSWORD=dbpassword -e POSTGRES_DB=dbexample -d postgres</h4> <br/>
+    <h4><code>docker run -p dbport:5432 --name testing -e POSTGRES_USER=dbuser -e POSTGRES_PASSWORD=dbpassword -e POSTGRES_DB=dbexample -d postgres</h4> <br/>
   </li>
   <li>Run <strong>migrations</strong>
-  <h4>
-    <code>
-    docker run --name migrate --network=host migrator
-    </code>
-  </h4>
+    <h4><code>docker run --name migrate --network=host migrator</code></h4>
   </li>
   <li>Run the <strong>API</strong>
-  <h4>
-    <code>
-    docker run -p 8080:8080 --name api-service --network=host warp-api
-    </code>
-  </h4>
+    <h4><code>docker run -p 8080:8080 --name api-service --network=host warp-api</code></h4>
   </li>
   <li>
   <strong>Enjoy!</strong>
