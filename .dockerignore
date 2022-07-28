@@ -1,5 +1,4 @@
 /target
 env-example
 .gitignore
-create_certs.sh
 docker-compose.yaml

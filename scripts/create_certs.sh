@@ -1,4 +1,4 @@
-eval "mkdir -p tls && cd tls"
+eval "cd .. && mkdir -p .tls && cd .tls"
 
 new_key="openssl genrsa -out key.pem"
 eval $new_key

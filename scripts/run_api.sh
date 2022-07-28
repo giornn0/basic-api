@@ -1,9 +1,3 @@
-api_image="docker build -t warp-api -f ./Dockerfile . "
-eval $api_image
-
-migrate_image="docker build -t migrator -f ./Diesel.Dockerfile ."
-eval $migrate_image
-
 up_postgres="docker run -p 3000:5432 -e POSTGRES_USER=dbuser -e POSTGRES_PASSWORD=dbpassword -e POSTGRES_DB=dbexample -d postgres"
 eval $up_postgres
 
