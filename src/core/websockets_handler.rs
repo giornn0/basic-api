@@ -38,7 +38,7 @@ pub fn get_ws_handler() -> impl Filter<Extract = impl Reply, Error = Rejection> 
 }
 
 async fn connection_handler(connections: WsConnection, ws: WebSocket, token: String) {
-    let auth = &AuthPayload::from_token(token).unwrap();
+    let auth = &AuthPayload::from_token(token, Some(true)).unwrap();
     let pool = get_ws_pool().unwrap();
     let uuid = NEXT_USER_ID.fetch_add(1, Ordering::Relaxed);
     let user = get_user(uuid as i32, &pool).unwrap();

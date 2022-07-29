@@ -18,7 +18,7 @@ pub trait FromToken {
     fn decode(token: String, key: String) -> Result<TokenData<Self>, Error>
     where
         Self: Sized;
-    fn from_token(token: String) -> Result<Self, Error>
+    fn from_token(token: String, ws: Option<bool>) -> Result<Self, Error>
     where
         Self: Sized;
     fn from_refresh(token: String) -> Result<Self, Error>
@@ -95,8 +95,8 @@ impl FromToken for AuthPayload {
         )
         .map_err(bad_token)
     }
-    fn from_token(bearer: String) -> Result<AuthPayload, Error> {
-        let mut token = bearer.split_whitespace();
+    fn from_token(bearer: String, ws: Option<bool>) -> Result<AuthPayload, Error> {
+        let mut token = if ws.is_some() && ws.unwrap(){bearer.split("Bearer")} else{bearer.split(" ")};
         let decoded = AuthPayload::decode(
             String::from(token.nth(1).expect("Token Malformed")),
             token_key(),

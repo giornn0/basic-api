@@ -18,7 +18,7 @@ pub fn with_pool(
 
 pub fn with_authenticathed() -> impl Filter<Extract = (AuthPayload,), Error = Rejection> + Clone {
     header::<String>("authorization")
-        .and_then(|token: String| async move { AuthPayload::from_token(token).map_err(custom) })
+        .and_then(|token: String| async move { AuthPayload::from_token(token, None).map_err(custom) })
 }
 pub fn with_refreshed() -> impl Filter<Extract = (AuthPayload,), Error = Rejection> + Clone {
     header::<String>("authorization")
