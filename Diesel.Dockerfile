@@ -10,5 +10,4 @@ ADD .env .env
 RUN cargo install diesel_cli
 
 COPY ./migrations ./migrations
-
-CMD ["diesel","setup"]
+COPY ./scripts/wait_for_postgres.sh ./wait_for_postgres.sh 

@@ -24,8 +24,8 @@ RUN groupadd $APP_USER \
     && mkdir -p ${APP}
 
 COPY --from=builder /base-api/target/release/base-api ${APP}/base-api
-COPY --from=builder /base-api/.env ${APP}/.env
-COPY --from=builder /base-api/.tls ${APP}/.tls
+COPY .env ${APP}/.env
+COPY .tls ${APP}/.tls
 
 RUN chown -R $APP_USER:$APP_USER ${APP}
 
