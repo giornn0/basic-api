@@ -50,8 +50,8 @@ impl AuthPayload {
     ) -> AuthPayload {
         AuthPayload {
             id: opt_id.unwrap_or(5),
-            log_model: opt_log_model.unwrap_or(LogModel::default()),
-            role: opt_role.unwrap_or(Role::default()),
+            log_model: opt_log_model.unwrap_or_default(),
+            role: opt_role.unwrap_or_default(),
             exp: 5555,
         }
     }
@@ -96,7 +96,11 @@ impl FromToken for AuthPayload {
         .map_err(bad_token)
     }
     fn from_token(bearer: String, ws: Option<bool>) -> Result<AuthPayload, Error> {
-        let mut token = if ws.is_some() && ws.unwrap(){bearer.split("Bearer")} else{bearer.split(" ")};
+        let mut token = if ws.is_some() && ws.unwrap() {
+            bearer.split("Bearer")
+        } else {
+            bearer.split(" ")
+        };
         let decoded = AuthPayload::decode(
             String::from(token.nth(1).expect("Token Malformed")),
             token_key(),
@@ -132,12 +136,13 @@ fn encode_model<AuthPayload: Serialize>(model: &AuthPayload, key: String) -> Res
 }
 
 #[derive(Serialize)]
-pub struct LoginTokens{
+pub struct LoginTokens {
     auth: Token,
     refresh: Token,
 }
-impl LoginTokens{
-    pub fn new(auth: Token, refresh: Token)-> Self{
+impl LoginTokens {
+    pub fn new(auth: Token, refresh: Token) -> Self {
         LoginTokens { auth, refresh }
     }
 }
+

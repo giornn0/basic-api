@@ -4,7 +4,7 @@ use crate::{
         self as credentials,
         dsl::{credentials as Table, email as Email},
     },
-    utils::{database:: to_error, traits::HashedValue},
+    utils::{database::to_error, traits::HashedValue},
 };
 use diesel::{
     prelude::*,
@@ -33,7 +33,7 @@ impl Credential {
     }
     pub fn password(&self) -> String {
         let cloned = (*self).clone();
-        String::from(cloned.password)
+        cloned.password
     }
     pub fn log_model(&self) -> LogModel {
         let clone = self.clone();
@@ -78,10 +78,7 @@ pub fn new_credential(
     value: NewCredential,
     conn: &PooledConnection<ConnectionManager<PgConnection>>,
 ) -> Result<Credential, Error> {
-    value
-        .insert_into(Table)
-        .get_result(conn)
-        .map_err(to_error)
+    value.insert_into(Table).get_result(conn).map_err(to_error)
 }
 pub fn unique_credential_mail(
     email: &String,
@@ -91,8 +88,7 @@ pub fn unique_credential_mail(
         .filter(Email.eq_all(email))
         .load::<Credential>(conn)
         .map_err(to_error)?;
-
-    if registers.len() > 0 {
+    if !registers.is_empty() {
         // the value of the username will automatically be added later
         return Err(Error::Redaction(
             StatusCode::BAD_REQUEST,

@@ -1,6 +1,6 @@
-use std::num::ParseIntError;
 use crate::core::errors::Error;
-use warp::{Rejection, reject::custom};
+use std::num::ParseIntError;
+use warp::{reject::custom, Rejection};
 
 pub fn port() -> Result<u16, ParseIntError> {
     std::env::var("PORT")
@@ -9,11 +9,16 @@ pub fn port() -> Result<u16, ParseIntError> {
         .unwrap_or(Ok(8080))
 }
 pub fn token_key() -> String {
-    std::env::var("JWT_KEY").ok().unwrap_or("without_secret".to_owned())
+    std::env::var("JWT_KEY")
+        .ok()
+        .unwrap_or_else(|| "without_secret".to_owned())
 }
 pub fn token_key_refresh() -> String {
-    std::env::var("JWT_KEY_REFRESH").ok().unwrap_or("without_secret_refresh_".to_owned())
+    std::env::var("JWT_KEY_REFRESH")
+        .ok()
+        .unwrap_or_else(|| "without_secret_refresh_".to_owned())
 }
-pub fn reject_error(error: Error)->Rejection{
+pub fn reject_error(error: Error) -> Rejection {
     custom(error)
 }
+

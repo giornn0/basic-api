@@ -73,10 +73,10 @@ async fn connection_handler(connections: WsConnection, ws: WebSocket, token: Str
             }
         };
         eprintln!("{:?}", &msg);
-        message_handler(uuid, (&user).clone().fullname(), msg, &connections).await;
+        message_handler(uuid, user.fullname(), msg, &connections).await;
     }
 
-    disconect_handler(uuid, (&user).clone().fullname(), &connections).await;
+    disconect_handler(uuid, user.fullname(), &connections).await;
 }
 
 async fn message_handler(
