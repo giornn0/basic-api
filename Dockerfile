@@ -25,7 +25,7 @@ RUN groupadd $APP_USER \
 
 COPY --from=builder /base-api/target/release/base-api ${APP}/base-api
 COPY .env ${APP}/.env
-COPY .tls ${APP}/.tls
+#COPY .tls ${APP}/.tls
 
 RUN chown -R $APP_USER:$APP_USER ${APP}
 
