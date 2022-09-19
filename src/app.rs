@@ -17,12 +17,12 @@ pub async fn app(pool: &Arc<Pool>) {
         .and(warp::path("api"))
         .and(warp::path::end())
         .and_then(up_server)
-        .or(login(&pool));
+        .or(login(pool));
 
     let ws = get_ws_handler();
     let apis = start
-        .or(users_router(&pool))
-        .or(organizations_router(&pool))
+        .or(users_router(pool))
+        .or(organizations_router(pool))
         .or(ws)
         .recover(handle_rejections);
 
@@ -34,9 +34,9 @@ pub async fn app(pool: &Arc<Pool>) {
     let routes = apis.with(cors);
 
     let (addr, server) = warp::serve(routes)
-        .tls()
-        .cert_path(".tls/cert.pem")
-        .key_path(".tls/key.pem")
+        //      .tls()
+        //      .cert_path(".tls/cert.pem")
+        //      .key_path(".tls/key.pem")
         .bind_with_graceful_shutdown(([0, 0, 0, 0], port), async {
             tokio::signal::ctrl_c()
                 .await
